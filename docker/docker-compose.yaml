@@ -2,7 +2,9 @@ version: '3'
 services:
   # API service
   api:
-    image: langgenius/dify-api:0.6.5
+    build: 
+      context: /workspace/workbench-dify/api
+      dockerfile: Dockerfile
     restart: always
     environment:
       # Startup mode, 'api' starts the API server.

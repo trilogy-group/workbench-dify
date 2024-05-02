@@ -1,0 +1,9 @@
+identity: # Basic information of the tool provider
+  author: Dify # Author
+  name: eng_ases # Name, unique, no duplication with other providers
+  label: # Label for frontend display
+    en_US: Engineering ASEs # English label
+  description: # Description for frontend display
+    en_US: Autonomous Software Engineers # English description
+  icon: icon.svg # Icon, needs to be placed in the _assets folder of the current module
+credentials_for_provider:
