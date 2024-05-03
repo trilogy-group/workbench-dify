@@ -1,19 +1,38 @@
-identity: # Basic information of the tool
-  name: rca # Tool name, unique, no duplication with other tools
-  author: Dify # Author
-  label: # Label for frontend display
-    en_US: Root Cause Analysis (RCA) ASE # English label
-description: # Description for frontend display
-  human: # Introduction for frontend display, supports multiple languages
+identity: 
+  name: ase_tool_rca 
+  author: Dify 
+  label: 
+    en_US: Root Cause Analysis (RCA) ASE 
+description: 
+  human: 
     en_US: RCA Agent identifies bugs in the provided codebase based on the issue.
-  llm: A tool that identifies the root cause of a github issue by analyzing the codebase. # Introduction passed to LLM, in order to make LLM better understand this tool, we suggest to write as detailed information about this tool as possible here, so that LLM can understand and use this tool
-parameters: # Parameter list
-  - name: issue_link # Parameter name
-    type: string # Parameter type
-    required: true # Required or not
-    label: # Parameter label
-      en_US: Issue Link # English label
-    human_description: # Introduction for frontend display, supports multiple languages
-      en_US: Link to Github Issue specifying the problem
-    llm_description: Link to Github Issue specifying the problem. # Introduction passed to LLM, similarly, in order to make LLM better understand this parameter, we suggest to write as detailed information about this parameter as possible here, so that LLM can understand this parameter
-    form: form # Form type, llm means this parameter needs to be inferred by Agent, the frontend will not display this parameter
+  llm: A tool that identifies the root cause of a github issue by analyzing the codebase. 
+parameters: 
+  - name: artifactUrls
+    type: string 
+    required: true 
+    label: 
+      en_US: Artifact URLs 
+    human_description: 
+      en_US: URLs of the artifacts related to the issue.
+    llm_description: URLs of the artifacts related to the issue. 
+    form: llm 
+  - name: productName  
+    type: string 
+    required: true 
+    label: 
+      en_US: Product Name 
+    human_description: 
+      en_US: Name of the product associated with the issue.
+    llm_description: Name of the product associated with the issue. 
+    form: llm 
+  - name: dryRun 
+    type: boolean 
+    required: false 
+    default: true 
+    label: 
+      en_US: Dry Run 
+    human_description: 
+      en_US: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like.
+    llm_description: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like. 
+    form: llm 
