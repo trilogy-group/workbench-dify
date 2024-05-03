@@ -47,7 +47,7 @@ class AppQueueManager:
         :return:
         """
         # wait for 10 minutes to stop listen
-        listen_timeout = 600
+        listen_timeout = 960
         start_time = time.time()
         last_ping_time = 0
 

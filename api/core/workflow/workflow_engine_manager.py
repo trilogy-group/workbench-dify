@@ -153,7 +153,7 @@ class WorkflowEngineManager:
                     raise ValueError('Max steps 30 reached.')
 
                 # or max execution time 10min reached
-                if self._is_timed_out(start_at=workflow_run_state.start_at, max_execution_time=600):
+                if self._is_timed_out(start_at=workflow_run_state.start_at, max_execution_time=960):
                     raise ValueError('Max execution time 10min reached.')
 
                 # run workflow, run multiple target nodes in the future
