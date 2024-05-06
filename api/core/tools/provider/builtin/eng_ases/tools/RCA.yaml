@@ -19,7 +19,7 @@ parameters:
     form: llm 
   - name: productName  
     type: string 
-    required: trzue 
+    required: true 
     label: 
       en_US: Product Name 
     human_description: 
