@@ -26,8 +26,12 @@ class ToolNode(BaseNode):
         """
         Run the tool node
         """
-
+        print(f"ABCXYZ. ToolNode._run: variable_pool: {variable_pool}")
+        for attribute, value in vars(variable_pool).items():
+            print(f"ABCXYZ. ToolNode._run: {attribute}: {value}")
+    
         node_data = cast(ToolNodeData, self.node_data)
+        print(f"ABCXYZ. ToolNode._run. Node data {node_data}")
 
         # fetch tool icon
         tool_info = {

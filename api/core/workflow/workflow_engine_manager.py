@@ -94,6 +94,7 @@ class WorkflowEngineManager:
         :param callbacks: workflow callbacks
         :return:
         """
+        print(f"ABCXYZ. run_workflow: workflow: {workflow}; user_id: {user_id}; user_from: {user_from}; user_inputs: {user_inputs}; system_inputs: {system_inputs}; callbacks: {callbacks};")
         # fetch workflow graph
         graph = workflow.graph_dict
         if not graph:
@@ -422,6 +423,19 @@ class WorkflowEngineManager:
                            node: BaseNode,
                            predecessor_node: Optional[BaseNode] = None,
                            callbacks: list[BaseWorkflowCallback] = None) -> None:
+        print(f"ABCXYZ. _run_workflow_node: workflow_run_state: {workflow_run_state}; node: {node}; predecessor_node: {predecessor_node}; callbacks: {callbacks};")
+        def print_attributes(name, obj):
+            try:
+                for attribute, value in vars(obj).items():
+                    print(f"{name}. {attribute}: {value}")
+            except:
+                pass
+        print_attributes("workflow_run_state", workflow_run_state)
+        print_attributes("variable+pool", workflow_run_state.variable_pool)
+        print_attributes("node", node)
+        print_attributes("predecessor_node", predecessor_node)
+
+
         if callbacks:
             for callback in callbacks:
                 callback.on_workflow_node_execute_started(

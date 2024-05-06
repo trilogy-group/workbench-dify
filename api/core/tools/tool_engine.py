@@ -120,6 +120,7 @@ class ToolEngine:
         """
         Workflow invokes the tool with the given arguments.
         """
+        print(f"ABCXYZ. ToolEngine.workflow_invoke: tool: {tool}, tool_parameters: {tool_parameters}, user_id: {user_id}, workflow_id: {workflow_id}")
         try:
             # hit the callback handler
             workflow_tool_callback.on_tool_start(
