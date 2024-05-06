@@ -1,11 +1,30 @@
 from core.tools.tool.builtin_tool import BuiltinTool
 from core.tools.entities.tool_entities import ToolInvokeMessage
-
+import ast
 import json
 from typing import Any, Dict, List, Union
 import os
 import requests
+from pydantic import BaseModel, validator
+from typing import List, Union
 API_KEY = os.environ.get("ENG_ASE_API_KEY")
+
+class RCAParametersModel(BaseModel):
+    artifactUrls: Union[List[str], str]
+    productName: str
+    dryRun: bool = True
+
+    @validator('artifactUrls', pre=True)
+    def parse_artifact_urls(cls, v):
+        if isinstance(v, str):
+            try:
+                urls_list = [e.strip() for e in v.split(',') if e.strip()]
+            except:
+                return v
+            if len(urls_list) == 0:
+              raise ValueError(f"Recieved no artifactUrls. {v}")
+            return urls_list[0] if len(urls_list) == 1 else urls_list
+
 
 class ASEToolRCA(BuiltinTool):
     def _invoke(self, 
@@ -15,11 +34,9 @@ class ASEToolRCA(BuiltinTool):
         """
             invoke tools
         """ 
-        response = trigger_ase("maint_rca_do", {
-            "artifactUrls": tool_parameters.get('artifactUrls'),
-            "productName": tool_parameters.get('productName'),
-            "dryRun": True # tool_parameters.get('dryRun', True) 
-        })
+        ase_inputs = RCAParametersModel(**tool_parameters)
+        ase_inputs.dryRun = True
+        response = trigger_ase("maint_rca_do", ase_inputs.dict())
         try:
             response_dict = json.loads(response.text)
             text = response_dict.get("answer", response_dict.get("error", f"Found dict keys: {str(response_dict.keys())}."))

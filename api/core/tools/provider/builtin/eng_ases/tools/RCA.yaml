@@ -14,12 +14,12 @@ parameters:
     label: 
       en_US: Artifact URLs 
     human_description: 
-      en_US: URLs of the artifacts related to the issue.
-    llm_description: URLs of the artifacts related to the issue. 
+      en_US: Provide the URLs of the artifacts related to the issue in a comma-separated list. The first URL should be the core issue link outlining the problem. Ensure this core issue link is included and listed first. If there are no other relevant links besides the core issue link, providing just that one is acceptable.
+    llm_description: A comma-separated list of URLs needed to resolve the issue. The first URL should be of the core issue. The absence of a core issue link constitutes a bad request and should prompt a request for correction. If only the core issue link is provided, it alone is sufficient and can be submitted directly.
     form: llm 
   - name: productName  
     type: string 
-    required: true 
+    required: trzue 
     label: 
       en_US: Product Name 
     human_description: 
