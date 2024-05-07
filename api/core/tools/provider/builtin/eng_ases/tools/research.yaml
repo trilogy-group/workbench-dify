@@ -1,0 +1,38 @@
+identity: 
+  name: ase_tool_research
+  author: Dify 
+  label: 
+    en_US: Research ASE 
+description: 
+  human: 
+    en_US: The Research Agent identifies bugs in the provided codebase by conducing a thorough investigation to find similar issues, facts, evidence, and code to identify the real issue.
+  llm: A tool that conducts a comprehensive research to identify the root cause of a defect by analyzing the codebase and other related documents. 
+parameters: 
+  - name: artifactUrls
+    type: string 
+    required: true 
+    label: 
+      en_US: Artifact URLs 
+    human_description: 
+      en_US: Provide the URLs of the artifacts related to the defect in a comma-separated list. The first URL should be the core link outlining the problem like a Github Issue, document, or other. Additional URLs can include any documents, evidence, or similar issues that can help in identifying the real defect.
+    llm_description: A comma-separated list of URLs needed to resolve the issue. The first URL should be of the core link outlining the problem (e.g. Github issue, document, other). Additional URLs that can help in identifying the real issue can be supplemented.
+    form: llm 
+  - name: productName  
+    type: string 
+    required: true 
+    label: 
+      en_US: Product Name 
+    human_description: 
+      en_US: Name of the product associated with the defect being researched.
+    llm_description: Name of the product associated with the defect being researched. 
+    form: llm 
+  - name: dryRun 
+    type: boolean 
+    required: false 
+    default: true 
+    label: 
+      en_US: Dry Run 
+    human_description: 
+      en_US: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like GitHub.
+    llm_description: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like GitHub. 
+    form: llm 
