@@ -330,6 +330,7 @@
             "essential": true,
             "name": "api",
             "memory": 1024,
+            "cpu": 128,
             "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/api:api1"
         },
         {
@@ -354,6 +355,7 @@
             "essential": true,
             "image": "postgres:15-alpine",
             "name": "db",
+            "cpu": 64,
             "memory": 512
         },
         {
@@ -361,6 +363,7 @@
             "image": "nginx:latest",
             "name": "nginx",
             "memory": 512,
+            "cpu": 64,
             "portMappings": [
                 {
                     "containerPort": 80,
@@ -377,6 +380,7 @@
             "essential": true,
             "image": "redis:6-alpine",
             "memory": 512,
+            "cpu": 64,
             "name": "redis"
         },
         {
@@ -397,6 +401,7 @@
             "essential": true,
             "image": "langgenius/dify-sandbox:0.1.0",
             "memory": 512,
+            "cpu": 64,
             "name": "sandbox"
         },
         {
@@ -445,6 +450,7 @@
             "essential": true,
             "image": "semitechnologies/weaviate:1.19.0",
             "name": "weaviate",
+            "cpu": 64,
             "memory": 512
         },
         {
@@ -465,6 +471,7 @@
             "essential": true,
             "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/dify.web:web1",
             "name": "web",
+            "cpu": 64,
             "memory": 512
         },
         {
@@ -681,12 +688,13 @@
             "essential": true,
             "image": "langgenius/dify-api:0.6.5",
             "name": "worker",
+            "cpu": 64,
             "memory": 512
         }
     ],
     "family": "workbench-dify",
-    "executionRoleArn": "arn:aws:iam::346945241475:role/workbench-dify",
     "requiresCompatibilities": ["FARGATE"],
+    "executionRoleArn": "arn:aws:iam::346945241475:role/workbench-dify",
     "networkMode": "awsvpc",
     "cpu": "1024",
     "memory": "2048"
