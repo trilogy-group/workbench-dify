@@ -36,3 +36,13 @@ parameters:
       en_US: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like.
     llm_description: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like. 
     form: llm 
+  - name: isMultiprocessing 
+    type: boolean 
+    required: false 
+    default: false 
+    label: 
+      en_US: Multiprocessing Request 
+    human_description: 
+      en_US: If true, instead of making a single tool run call, multiple tool runs will be made in parallel.
+    llm_description: Should be True if the user mentions its a multiprocessing request and provides multiple github issues or just says that RCA must be performed on each issue. So true if issues to perform RCA on are separate issues.
+    form: llm 

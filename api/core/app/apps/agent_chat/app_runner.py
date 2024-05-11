@@ -1,5 +1,6 @@
 import logging
 from typing import cast
+import inspect
 
 from core.agent.cot_chat_agent_runner import CotChatAgentRunner
 from core.agent.cot_completion_agent_runner import CotCompletionAgentRunner
@@ -31,7 +32,8 @@ class AgentChatAppRunner(AppRunner):
     def run(self, application_generate_entity: AgentChatAppGenerateEntity,
             queue_manager: AppQueueManager,
             conversation: Conversation,
-            message: Message) -> None:
+            message: Message,
+            request_info:dict={}) -> None:
         """
         Run assistant application
         :param application_generate_entity: application generate entity
@@ -241,6 +243,7 @@ class AgentChatAppRunner(AppRunner):
             message=message,
             query=query,
             inputs=inputs,
+            **({'request_info': request_info} if 'request_info' in inspect.signature(runner.run).parameters else {})
         )
 
         # handle invoke result

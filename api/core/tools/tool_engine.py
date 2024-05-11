@@ -1,7 +1,12 @@
+import logging
 from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Union
+import json
+import traceback
+import asyncio
 
+from core.utils.chat_spawner import spawn_chats, split_queries
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.callback_handler.agent_tool_callback_handler import DifyAgentCallbackHandler
 from core.callback_handler.workflow_tool_callback_handler import DifyWorkflowCallbackHandler
@@ -29,7 +34,8 @@ class ToolEngine:
     @staticmethod
     def agent_invoke(tool: Tool, tool_parameters: Union[str, dict],
                      user_id: str, tenant_id: str, message: Message, invoke_from: InvokeFrom,
-                     agent_tool_callback: DifyAgentCallbackHandler) \
+                     agent_tool_callback: DifyAgentCallbackHandler,
+                     request_info:dict={}) \
                         -> tuple[str, list[tuple[MessageFile, bool]], ToolInvokeMeta]:
         """
         Agent invokes the tool with the given arguments.
@@ -56,7 +62,22 @@ class ToolEngine:
                 tool_inputs=tool_parameters
             )
 
-            meta, response = ToolEngine._invoke(tool, tool_parameters, user_id)
+            if tool_parameters.get('isMultiprocessing', False) and request_info:
+                # Request info should be empty for all calls except to Agent via the Explor page. isMultiprocessing defaults to False for all tools that do not have the parameter.
+                queries = split_queries(request_info['query'])
+                logging.info(f"Query splitter result: {queries}")
+
+                asyncio.run(spawn_chats(request_info, queries))
+
+                response = [ToolInvokeMessage(
+                    type=ToolInvokeMessage.MessageType.TEXT, 
+                    message=f"Having recieved a multiprocessing request, I created {len(queries)} chats with a unique task each. Please refresh the page to see them.",
+                    save_as='')]
+                meta = ToolInvokeMeta(time_cost=0.0)
+            else:
+                logging.info(f"INVOKING TOOL FOR {request_info}.")
+                meta, response = ToolEngine._invoke(tool, tool_parameters, user_id)
+            
             response = ToolFileMessageTransformer.transform_tool_invoke_messages(
                 messages=response, 
                 user_id=user_id, 
