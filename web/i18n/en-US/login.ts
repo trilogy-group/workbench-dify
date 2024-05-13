@@ -1,5 +1,5 @@
 const translation = {
-  pageTitle: 'Hey, let\'s get started!👋',
+  pageTitle: 'Hello there, let\'s get started!👋',
   welcome: 'Welcome to Dify, please log in to continue.',
   email: 'Email address',
   emailPlaceholder: 'Your email',

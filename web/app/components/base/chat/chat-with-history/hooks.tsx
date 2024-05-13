@@ -228,19 +228,22 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   }, [setShowConfigPanelBeforeChat, setShowNewConversationItemInList, checkInputsRequired])
   const currentChatInstanceRef = useRef<{ handleStop: () => void }>({ handleStop: () => {} })
   const handleChangeConversation = useCallback((conversationId: string) => {
-    currentChatInstanceRef.current.handleStop()
+    // currentChatInstanceRef.current.handleStop()
+    console.log("Handle change conversation called")
     setNewConversationId('')
     handleConversationIdInfoChange(conversationId)
 
-    if (conversationId === '' && !checkInputsRequired(true))
+    if (conversationId === '' && !checkInputsRequired(true)){
+      console.log("Creating a new conversation")
       setShowConfigPanelBeforeChat(true)
+    }
     else
       setShowConfigPanelBeforeChat(false)
   }, [handleConversationIdInfoChange, setShowConfigPanelBeforeChat, checkInputsRequired])
   const handleNewConversation = useCallback(() => {
-    currentChatInstanceRef.current.handleStop()
+    // currentChatInstanceRef.current.handleStop()
     setNewConversationId('')
-
+    console.log("Show new conversation item is", showNewConversationItemInList)
     if (showNewConversationItemInList) {
       handleChangeConversation('')
     }
