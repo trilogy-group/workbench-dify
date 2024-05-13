@@ -118,10 +118,11 @@ class ChatApi(InstalledAppResource):
             "url": request.url,
             "bearer_token": request.headers.get('Authorization'),
             "supports_spawning": True,
-            "query": args['query']
+            "query": args['query'],
+            "request_body": args,
+            "app_id": app_model.id
         }
         logging.info(f"RECIEVED REQUEST '{request_info['query']}' to {request_info['url']}")
-
 
         try:
             response = AppGenerateService.generate(

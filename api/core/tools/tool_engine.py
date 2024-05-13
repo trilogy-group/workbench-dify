@@ -63,17 +63,21 @@ class ToolEngine:
             )
 
             if tool_parameters.get('isMultiprocessing', False) and request_info:
-                # Request info should be empty for all calls except to Agent via the Explor page. isMultiprocessing defaults to False for all tools that do not have the parameter.
-                queries = split_queries(request_info['query'])
-                logging.info(f"Query splitter result: {queries}")
+                try:
+                    # Request info should be empty for all calls except to Agent via the Explore page. isMultiprocessing defaults to False for all tools that do not have the parameter.
+                    queries = split_queries(request_info['request_body']['conversation_id'], request_info['app_id'], request_info['query'])
+                    logging.info(f"Query splitter result: {queries}")
 
-                asyncio.run(spawn_chats(request_info, queries))
+                    asyncio.run(spawn_chats(request_info, queries))
 
-                response = [ToolInvokeMessage(
-                    type=ToolInvokeMessage.MessageType.TEXT, 
-                    message=f"Having recieved a multiprocessing request, I created {len(queries)} chats with a unique task each. Please refresh the page to see them.",
-                    save_as='')]
-                meta = ToolInvokeMeta(time_cost=0.0)
+                    response = [ToolInvokeMessage(
+                        type=ToolInvokeMessage.MessageType.TEXT, 
+                        message=f"Having recieved a multiprocessing request, I created {len(queries)} chats with a unique task each. Please refresh the page to see them.",
+                        save_as='')]
+                    meta = ToolInvokeMeta(time_cost=0.0)
+                except Exception as e:
+                    logging.error(f"Traceback {traceback.format_exc()}")
+                    raise e
             else:
                 logging.info(f"INVOKING TOOL FOR {request_info}.")
                 meta, response = ToolEngine._invoke(tool, tool_parameters, user_id)

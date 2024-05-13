@@ -1,6 +1,7 @@
-from typing import Dict, List
+from typing import Dict, List, Union, Any
 import httpx
-from typing import Dict
+from extensions.ext_database import db
+from models.model import Conversation
 import asyncio
 import logging
 import time
@@ -55,30 +56,59 @@ def str_2_json(_str: str) -> str:
     except:
         return json.loads(_str)
 
-system_message = """You are a query request splitter. Your role is to divide a user's multiprocessing request into multiple task instructions, rather than treating it as a batch operation. 
+QUERY_SPLITTER_SYSTEM_PROMPT = """As a Query Request Splitter, your role is to break down a user's multiprocessing request into several task instructions, instead of processing it as a single operation. You will be given a snippet of a conversation between a User and an Assistant. 
 
-You need to respond with a valid JSON that adheres to the schema provided below.
+### Instructions 
+- Analyze this conversation carefully to define the multiple tasks. 
+- Always prioritize the most recent instruction or request from the user, as well as the latest information provided by the user that will facilitate task performance.
+- Structure each query as follows:
+"Can you perform action X using the following information Y? Here are some supplementary materials that may help in performing your action: Z can be used to do A"
 
+Your response should be a valid JSON that complies with the schema provided below.
 ```
 {
   "queries": [list of strings - queries or tasks for parallel processing.]
 }
-```
+```"""
 
-Each query should be structured as follows:
-"Can you perform action X using the following information Y? Here are some supplementary materials that may help in performing your action: Z can be used to do A"
-For your information, if supplementary material is not provided, do not mention it."""
-
-def split_queries(query: str) -> List[str]:
+def llm_call(system_message, user_message, history: List[Dict[str, Any]] = [], model: str = 'gpt-4-turbo', is_json=False) -> Union[dict, str]:
     client = OpenAI()
     
     completion = client.chat.completions.create(
-        model="gpt-4",
+        model=model,
         messages=[
             {"role": "system", "content": system_message},
-            {"role": "user", "content": query}
+            *history,
+            {"role": "user", "content": user_message}
         ]
     )
-
     response = completion.choices[0].message.content
-    return str_2_json(response)['queries']
+    return str_2_json(response) if is_json else response
+
+def split_queries(conversation_id:str, app_id:str, query: str) -> List[str]:
+    _, history = get_chat_history(conversation_id, app_id)
+    if len(history):
+        history.append({'role': 'user', 'content' if 'content' in history[0] else 'text': query})
+        user_message = json.dumps(history, indent=2)
+    else:
+        user_message = query
+    queries = llm_call(QUERY_SPLITTER_SYSTEM_PROMPT, user_message, is_json = True)
+    return queries['queries']
+
+
+def get_chat_history(conversation_id:str, app_id:str) -> List[Dict[str, Any]]:
+    if not conversation_id:
+        return None, []
+    conversation = db.session.query(Conversation).filter(
+        Conversation.app_id == app_id,
+        Conversation.id == conversation_id
+    ).first()
+
+    if len(conversation.messages):
+        history = conversation.messages[-1].message
+        if history[0]['role'] == 'system':
+            history = history[1:] if len(history)>0 else []
+        history = [{k:v for k, v in message.items() if k in ['role', 'content', 'text']} for message in history]
+        return conversation.summary, history
+    else:
+        return conversation.summary, []

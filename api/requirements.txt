@@ -50,7 +50,7 @@ websocket-client~=1.7.0
 dashscope[tokenizer]~=1.17.0
 huggingface_hub~=0.16.4
 transformers~=4.35.0
-tokenizers~=0.15.0
+tokenizers==0.15.2
 pandas==1.5.3
 xinference-client==0.9.4
 safetensors~=0.4.3
@@ -83,4 +83,4 @@ pydantic~=1.10.0
 pgvecto-rs==0.1.4
 firecrawl-py==0.0.5
 oss2==2.15.0
-httpx[http2]==0.27.0
+httpx[http2]==0.24.1
