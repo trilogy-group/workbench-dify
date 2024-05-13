@@ -9,6 +9,9 @@ from openai import OpenAI
 import json 
 import re
 from tenacity import retry, stop_after_attempt, wait_fixed
+from core.model_manager import ModelManager
+from core.model_runtime.entities.model_entities import ModelType
+from core.model_runtime.entities.message_entities import UserPromptMessage, SystemPromptMessage, AssistantPromptMessage
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(3))
 async def make_request_async(request_model: dict, query: str) -> None:
@@ -71,28 +74,34 @@ Your response should be a valid JSON that complies with the schema provided belo
 }
 ```"""
 
-def llm_call(system_message, user_message, history: List[Dict[str, Any]] = [], model: str = 'gpt-4-turbo', is_json=False) -> Union[dict, str]:
-    client = OpenAI()
-    
-    completion = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": system_message},
-            *history,
-            {"role": "user", "content": user_message}
-        ]
+def openai_llm_call(tenant_id: str, system_message: str, user_message: str, model: str = 'gpt-4-turbo', is_json=False) -> Union[dict, str]:
+    model_manager = ModelManager()
+    model_instance = model_manager.get_model_instance(
+        tenant_id=tenant_id,
+        model_type=ModelType.LLM,
+        provider='openai',
+        model=model
     )
-    response = completion.choices[0].message.content
-    return str_2_json(response) if is_json else response
+    prompt_messages = [
+        SystemPromptMessage(content=system_message),
+        UserPromptMessage(content=user_message),
+    ]
 
-def split_queries(conversation_id:str, app_id:str, query: str) -> List[str]:
+    result = model_instance.invoke_llm(
+        prompt_messages=prompt_messages,
+        stream=False
+    ).message.content
+    
+    return str_2_json(result) if is_json else result
+
+def split_queries(tenant_id: str, conversation_id:str, app_id:str, query: str) -> List[str]:
     _, history = get_chat_history(conversation_id, app_id)
     if len(history):
         history.append({'role': 'user', 'content' if 'content' in history[0] else 'text': query})
         user_message = json.dumps(history, indent=2)
     else:
         user_message = query
-    queries = llm_call(QUERY_SPLITTER_SYSTEM_PROMPT, user_message, is_json = True)
+    queries = openai_llm_call(tenant_id, QUERY_SPLITTER_SYSTEM_PROMPT, user_message, is_json = True)
     return queries['queries']
 
 
@@ -105,9 +114,8 @@ def get_chat_history(conversation_id:str, app_id:str) -> List[Dict[str, Any]]:
     ).first()
 
     if len(conversation.messages):
-        history = conversation.messages[-1].message
-        if history[0]['role'] == 'system':
-            history = history[1:] if len(history)>0 else []
+        history = conversation.messages[-1].message if conversation.messages[-1].message.strip() else conversation.messages[-2].message
+        history = history[1:] if history[0]['role'] == 'system' else history
         history = [{k:v for k, v in message.items() if k in ['role', 'content', 'text']} for message in history]
         return conversation.summary, history
     else:
