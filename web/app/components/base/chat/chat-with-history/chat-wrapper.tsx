@@ -23,6 +23,7 @@ const ChatWrapper = () => {
     inputsForms,
     newConversationInputs,
     handleNewConversationCompleted,
+    handleNewConversationStarted,
     isMobile,
     isInstalledApp,
     appId,
@@ -81,6 +82,7 @@ const ChatWrapper = () => {
       {
         onGetSuggestedQuestions: responseItemId => fetchSuggestedQuestions(responseItemId, isInstalledApp, appId),
         onConversationComplete: currentConversationId ? undefined : handleNewConversationCompleted,
+        onConversationFirstMessage: currentConversationId ? undefined : handleNewConversationStarted,
         isPublicAPI: !isInstalledApp,
       },
     )
@@ -91,6 +93,7 @@ const ChatWrapper = () => {
     handleSend,
     newConversationInputs,
     handleNewConversationCompleted,
+    handleNewConversationStarted,
     isInstalledApp,
     appId,
   ])

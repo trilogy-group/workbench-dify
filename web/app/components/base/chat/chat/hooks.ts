@@ -26,6 +26,7 @@ type SendCallback = {
   onGetConvesationMessages?: (conversationId: string, getAbortController: GetAbortController) => Promise<any>
   onGetSuggestedQuestions?: (responseItemId: string, getAbortController: GetAbortController) => Promise<any>
   onConversationComplete?: (conversationId: string) => void
+  onConversationFirstMessage?: (conversationId: string) => void
   isPublicAPI?: boolean
 }
 
@@ -207,6 +208,7 @@ export const useChat = (
       onGetConvesationMessages,
       onGetSuggestedQuestions,
       onConversationComplete,
+      onConversationFirstMessage,
       isPublicAPI,
     }: SendCallback,
   ) => {
@@ -295,7 +297,11 @@ export const useChat = (
           }
 
           if (isFirstMessage && newConversationId)
+          {
             connversationId.current = newConversationId
+            if (onConversationFirstMessage)
+              onConversationFirstMessage(connversationId.current)
+          }
 
           taskIdRef.current = taskId
           if (messageId)
