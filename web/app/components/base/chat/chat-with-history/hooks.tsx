@@ -92,8 +92,12 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const { data: appConversationData, isLoading: appConversationDataLoading, mutate: mutateAppConversationData } = useSWR(['appConversationData', isInstalledApp, appId, false], () => fetchConversations(isInstalledApp, appId, undefined, false, 90))
   const { data: appChatListData, isLoading: appChatListDataLoading } = useSWR(chatShouldReloadKey ? ['appChatList', chatShouldReloadKey, isInstalledApp, appId] : null, () => fetchChatList(chatShouldReloadKey, isInstalledApp, appId))
 
+  useEffect(() => {
+    console.log("Conversation Chat list is blah blah", conversationChatList)
+  }, [conversationChatList])
   const appPrevChatList = useMemo(() => {
-    console.log("conversation chat list for current conversation", conversationChatList?.[appId || '']?.[currentConversationId])
+    if(!currentConversationId) return []
+    console.log("conversation chat list for current conversation ID", currentConversationId, "Is", conversationChatList?.[appId || '']?.[currentConversationId])
     if (!conversationChatList?.[appId || '']?.[currentConversationId] || conversationChatList?.[appId || '']?.[currentConversationId]?.length === 0){
       const data = appChatListData?.data || []
       const chatList: ChatItem[] = []
