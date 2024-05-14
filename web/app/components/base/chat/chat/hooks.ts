@@ -190,9 +190,8 @@ export const useChat = (
       chatListRef.current.filter(item => item.id !== responseItem.id && item.id !== placeholderAnswerId),
       (draft) => {
         if (!draft.find(item => item.id === questionId))
-          draft.push({ ...questionItem })
-
-        draft.push({ ...responseItem })
+          draft.push(JSON.parse(JSON.stringify(questionItem))) // deep copy
+        draft.push(JSON.parse(JSON.stringify(responseItem))) // deep copy
       })
     handleUpdateChatList(newListWithAnswer)
     // if(updateGlobalChatListForApp){
