@@ -329,9 +329,18 @@
             ],
             "essential": true,
             "name": "api",
-            "memory": 1024,
-            "cpu": 128,
-            "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/api:api1"
+            "memory": 2048,
+            "memoryReservation": 512,
+            "cpu": 512,
+            "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/api:api1",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
         },
         {
             "environment": [
@@ -355,14 +364,32 @@
             "essential": true,
             "image": "postgres:15-alpine",
             "name": "db",
-            "cpu": 64,
-            "memory": 512
+            "cpu": 256,
+            "memoryReservation": 2048,
+            "memory": 8192,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
         },
         {
             "essential": true,
             "image": "nginx:latest",
             "name": "nginx",
-            "memory": 512,
+            "memory": 2048,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "memoryReservation": 512,
             "cpu": 64,
             "portMappings": [
                 {
@@ -379,7 +406,16 @@
             ],
             "essential": true,
             "image": "redis:6-alpine",
-            "memory": 512,
+            "memory": 16384,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "memoryReservation": 2048,
             "cpu": 64,
             "name": "redis"
         },
@@ -400,7 +436,16 @@
             ],
             "essential": true,
             "image": "langgenius/dify-sandbox:0.1.0",
-            "memory": 512,
+            "memory": 2048,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "memoryReservation": 512,
             "cpu": 64,
             "name": "sandbox"
         },
@@ -451,7 +496,16 @@
             "image": "semitechnologies/weaviate:1.19.0",
             "name": "weaviate",
             "cpu": 64,
-            "memory": 512
+            "memory": 2048,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "memoryReservation": 512 
         },
         {
             "environment": [
@@ -472,7 +526,16 @@
             "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/dify.web:web1",
             "name": "web",
             "cpu": 64,
-            "memory": 512
+            "memory": 2048,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "memoryReservation": 512
         },
         {
             "environment": [
@@ -688,14 +751,23 @@
             "essential": true,
             "image": "langgenius/dify-api:0.6.5",
             "name": "worker",
-            "cpu": 64,
-            "memory": 512
+            "cpu": 256,
+            "logConfiguration": {
+       "logDriver": "awslogs",
+       "options": {
+           "awslogs-group": "/ecs/workbench-dify",
+           "awslogs-region": "us-east-1",
+           "awslogs-stream-prefix": "ecs"
+       }
+   },
+            "memoryReservation": 2048,
+            "memory": 8192
         }
     ],
     "family": "workbench-dify",
     "requiresCompatibilities": ["FARGATE"],
     "executionRoleArn": "arn:aws:iam::346945241475:role/workbench-dify",
     "networkMode": "awsvpc",
-    "cpu": "1024",
-    "memory": "2048"
+    "cpu": "4096",
+    "memory": "30720"
 }
