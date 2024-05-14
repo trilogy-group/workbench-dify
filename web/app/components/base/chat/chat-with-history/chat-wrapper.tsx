@@ -56,6 +56,7 @@ const ChatWrapper = () => {
     },
     appPrevChatList,
     taskId => stopChatMessageResponding('', taskId, isInstalledApp, appId),
+    currentConversationId,
     (conversationId, chatList) => setConversationChatList(
       (prevConversationChatList: Record<string, any>) => ({...prevConversationChatList, [appId || '']: {...prevConversationChatList?.[appId || ''], [conversationId]: chatList}})
     )

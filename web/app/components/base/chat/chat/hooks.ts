@@ -78,11 +78,12 @@ export const useChat = (
   prevChatList?: ChatItem[],
   stopChat?: (taskId: string) => void,
   // globalConversationChatList?: Record<string, any>,
+  currentConversationId?: string,
   updateGlobalChatListForApp?: (conversationId: string, chatList: any) => void
 ) => {
   const { t } = useTranslation()
   const { notify } = useToastContext()
-  const connversationId = useRef('')
+  const connversationId = useRef(currentConversationId || '')
   const hasStopResponded = useRef(false)
   const [isResponding, setIsResponding] = useState(false)
   const isRespondingRef = useRef(false)

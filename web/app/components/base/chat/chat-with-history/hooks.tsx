@@ -61,10 +61,10 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
       changeLanguage(appData.site.default_language)
   }, [appData])
 
-  const [conversationIdInfo, setConversationIdInfo] = useState<Record<string, string>>({})
-  const [conversationChatList, setConversationChatList] = useLocalStorageState<Record<string, any>>(CONVERSATION_INFO, {
+  const [conversationIdInfo, setConversationIdInfo] = useLocalStorageState<Record<string, string>>(CONVERSATION_ID_INFO, {
     defaultValue: {},
   })
+  const [conversationChatList, setConversationChatList] = useState<Record<string, any>>({})
   const currentConversationId = useMemo(() => conversationIdInfo?.[appId || ''] || '', [appId, conversationIdInfo])
   const handleConversationIdInfoChange = useCallback((changeConversationId: string) => {
     if (appId) {
@@ -93,7 +93,6 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const { data: appChatListData, isLoading: appChatListDataLoading } = useSWR(chatShouldReloadKey ? ['appChatList', chatShouldReloadKey, isInstalledApp, appId] : null, () => fetchChatList(chatShouldReloadKey, isInstalledApp, appId))
 
   useEffect(() => {
-    console.log("Conversation Chat list is blah blah", conversationChatList)
   }, [conversationChatList])
   const appPrevChatList = useMemo(() => {
     if(!currentConversationId) return []
@@ -122,7 +121,6 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
         })
       }
       setConversationChatList(prevConversationChatList => ({...prevConversationChatList, [appId || '']: {...prevConversationChatList?.[appId || ''], [currentConversationId]: chatList}}))
-      console.log("setting conversation chat list to ", chatList)
       return chatList
     }
     else {
@@ -363,6 +361,13 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const handleNewConversationStarted = useCallback((newConversationId: string) => {
     console.log("Handle New converstaion Started is called for newConversationId: ", newConversationId)
     setNewConversationId(newConversationId)
+    setConversationChatList(prevConversations => {
+      const {'': _, ...remainingConversations} = prevConversations[appId || '']
+      return {
+        ...prevConversations,
+        [appId || '']: remainingConversations
+      }
+    })
     handleConversationIdInfoChange(newConversationId)
     setShowNewConversationItemInList(false)
     mutateAppConversationData()
