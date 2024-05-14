@@ -341,11 +341,17 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   }, [isInstalledApp, appId, notify, t, conversationRenaming, originConversationList])
 
   const handleNewConversationCompleted = useCallback((newConversationId: string) => {
+    console.log("Handle New converstaion Completed is called..")
+    mutateAppConversationData()
+  }, [mutateAppConversationData, handleConversationIdInfoChange])
+
+  const handleNewConversationStarted = useCallback((newConversationId: string) => {
+    console.log("Handle New converstaion Started is called for newConversationId: ", newConversationId)
     setNewConversationId(newConversationId)
     handleConversationIdInfoChange(newConversationId)
     setShowNewConversationItemInList(false)
     mutateAppConversationData()
-  }, [mutateAppConversationData, handleConversationIdInfoChange])
+  }, [handleConversationIdInfoChange])
 
   const handleFeedback = useCallback(async (messageId: string, feedback: Feedback) => {
     await updateFeedback({ url: `/messages/${messageId}/feedbacks`, body: { rating: feedback.rating } }, isInstalledApp, appId)
@@ -387,6 +393,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     conversationRenaming,
     handleRenameConversation,
     handleNewConversationCompleted,
+    handleNewConversationStarted,
     newConversationId,
     chatShouldReloadKey,
     handleFeedback,
