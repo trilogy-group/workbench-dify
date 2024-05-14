@@ -108,6 +108,9 @@ export const useChat = (
   const handleUpdateChatList = useCallback((newChatList: ChatItem[]) => {
     setChatList(newChatList)
     if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
+      if(updateGlobalChatListForApp){
+        updateGlobalChatListForApp(connversationId.current, newChatList)
+      }
     chatListRef.current = newChatList
   }, [])
   const handleResponding = useCallback((isResponding: boolean) => {
@@ -194,10 +197,6 @@ export const useChat = (
         draft.push(JSON.parse(JSON.stringify(responseItem))) // deep copy
       })
     handleUpdateChatList(newListWithAnswer)
-    // if(updateGlobalChatListForApp){
-    //   console.log("updating global conversation chat list")
-    //   updateGlobalChatListForApp(connversationId.current, newListWithAnswer)
-    // }
   }, [handleUpdateChatList])
 
   const handleSend = useCallback(async (
