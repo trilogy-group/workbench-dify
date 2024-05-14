@@ -15,7 +15,7 @@ import type {
   ChatItem,
   Feedback,
 } from '../types'
-import { CONVERSATION_ID_INFO } from '../constants'
+import { CONVERSATION_ID_INFO, CONVERSATION_INFO } from '../constants'
 import {
   delConversation,
   fetchAppInfo,
@@ -64,9 +64,13 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const [conversationIdInfo, setConversationIdInfo] = useLocalStorageState<Record<string, string>>(CONVERSATION_ID_INFO, {
     defaultValue: {},
   })
+  const [conversationChatList, setConversationChatList] = useLocalStorageState<Record<string, any>>(CONVERSATION_INFO, {
+    defaultValue: {},
+  })
   const currentConversationId = useMemo(() => conversationIdInfo?.[appId || ''] || '', [appId, conversationIdInfo])
   const handleConversationIdInfoChange = useCallback((changeConversationId: string) => {
     if (appId) {
+      console.log("conversation id info is", conversationIdInfo)
       setConversationIdInfo({
         ...conversationIdInfo,
         [appId || '']: changeConversationId,
@@ -77,6 +81,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
 
   const [newConversationId, setNewConversationId] = useState('')
   const chatShouldReloadKey = useMemo(() => {
+    console.log("currentConversationID", currentConversationId, " newConversationId", newConversationId);
     if (currentConversationId === newConversationId)
       return ''
 
@@ -85,35 +90,42 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
 
   const { data: appParams } = useSWR(['appParams', isInstalledApp, appId], () => fetchAppParams(isInstalledApp, appId))
   const { data: appMeta } = useSWR(['appMeta', isInstalledApp, appId], () => fetchAppMeta(isInstalledApp, appId))
-  const { data: appPinnedConversationData, mutate: mutateAppPinnedConversationData } = useSWR(['appConversationData', isInstalledApp, appId, true], () => fetchConversations(isInstalledApp, appId, undefined, true, 100))
-  const { data: appConversationData, isLoading: appConversationDataLoading, mutate: mutateAppConversationData } = useSWR(['appConversationData', isInstalledApp, appId, false], () => fetchConversations(isInstalledApp, appId, undefined, false, 100))
+  const { data: appPinnedConversationData, mutate: mutateAppPinnedConversationData } = useSWR(['appConversationData', isInstalledApp, appId, true], () => fetchConversations(isInstalledApp, appId, undefined, true, 20))
+  const { data: appConversationData, isLoading: appConversationDataLoading, mutate: mutateAppConversationData } = useSWR(['appConversationData', isInstalledApp, appId, false], () => fetchConversations(isInstalledApp, appId, undefined, false, 90))
   const { data: appChatListData, isLoading: appChatListDataLoading } = useSWR(chatShouldReloadKey ? ['appChatList', chatShouldReloadKey, isInstalledApp, appId] : null, () => fetchChatList(chatShouldReloadKey, isInstalledApp, appId))
 
   const appPrevChatList = useMemo(() => {
-    const data = appChatListData?.data || []
-    const chatList: ChatItem[] = []
+    console.log("conversation chat list for current conversation", conversationChatList?.[appId || '']?.[currentConversationId])
+    if (!conversationChatList?.[appId || '']?.[currentConversationId] || conversationChatList?.[appId || '']?.[currentConversationId]?.length === 0){
+      const data = appChatListData?.data || []
+      const chatList: ChatItem[] = []
 
-    if (currentConversationId && data.length) {
-      data.forEach((item: any) => {
-        chatList.push({
-          id: `question-${item.id}`,
-          content: item.query,
-          isAnswer: false,
-          message_files: item.message_files?.filter((file: any) => file.belongs_to === 'user') || [],
+      if (currentConversationId && data.length) {
+        data.forEach((item: any) => {
+          chatList.push({
+            id: `question-${item.id}`,
+            content: item.query,
+            isAnswer: false,
+            message_files: item.message_files?.filter((file: any) => file.belongs_to === 'user') || [],
+          })
+          chatList.push({
+            id: item.id,
+            content: item.answer,
+            agent_thoughts: addFileInfos(item.agent_thoughts ? sortAgentSorts(item.agent_thoughts) : item.agent_thoughts, item.message_files),
+            feedback: item.feedback,
+            isAnswer: true,
+            citation: item.retriever_resources,
+            message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
+          })
         })
-        chatList.push({
-          id: item.id,
-          content: item.answer,
-          agent_thoughts: addFileInfos(item.agent_thoughts ? sortAgentSorts(item.agent_thoughts) : item.agent_thoughts, item.message_files),
-          feedback: item.feedback,
-          isAnswer: true,
-          citation: item.retriever_resources,
-          message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
-        })
-      })
+      }
+      setConversationChatList(prevConversationChatList => ({...prevConversationChatList, [appId || '']: {...prevConversationChatList?.[appId || ''], [currentConversationId]: chatList}}))
+      console.log("setting conversation chat list to ", chatList)
+      return chatList
     }
-
-    return chatList
+    else {
+      return conversationChatList[appId || ''][currentConversationId]
+    }
   }, [appChatListData, currentConversationId])
 
   const [showNewConversationItemInList, setShowNewConversationItemInList] = useState(false)
@@ -221,6 +233,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     return true
   }, [inputsForms, notify, t])
   const handleStartChat = useCallback(() => {
+    console.log("Start chat called")
     if (checkInputsRequired()) {
       setShowConfigPanelBeforeChat(false)
       setShowNewConversationItemInList(true)
@@ -391,5 +404,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     chatShouldReloadKey,
     handleFeedback,
     currentChatInstanceRef,
+    conversationChatList, 
+    setConversationChatList
   }
 }

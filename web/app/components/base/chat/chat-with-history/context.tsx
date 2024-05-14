@@ -46,6 +46,8 @@ export type ChatWithHistoryContextValue = {
   appId?: string
   handleFeedback: (messageId: string, feedback: Feedback) => void
   currentChatInstanceRef: RefObject<{ handleStop: () => void }>
+  conversationChatList: Record<string, any> | undefined
+  setConversationChatList: (prevConversationChatList: Record<string, any>) => void
 }
 
 export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>({
@@ -71,5 +73,7 @@ export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>
   isInstalledApp: false,
   handleFeedback: () => {},
   currentChatInstanceRef: { current: { handleStop: () => {} } },
+  conversationChatList: {}, 
+  setConversationChatList: (prevConversationChatList) => {},
 })
 export const useChatWithHistoryContext = () => useContext(ChatWithHistoryContext)

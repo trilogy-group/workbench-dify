@@ -4,7 +4,7 @@ import type {
   ChatConfig,
   OnSend,
 } from '../types'
-import { useChat } from '../chat/hooks'
+import { useChat} from '../chat/hooks'
 import { useChatWithHistoryContext } from './context'
 import Header from './header'
 import ConfigPanel from './config-panel'
@@ -29,6 +29,8 @@ const ChatWrapper = () => {
     appMeta,
     handleFeedback,
     currentChatInstanceRef,
+    conversationChatList,
+    setConversationChatList,
   } = useChatWithHistoryContext()
   const appConfig = useMemo(() => {
     const config = appParams || {}
@@ -53,6 +55,9 @@ const ChatWrapper = () => {
     },
     appPrevChatList,
     taskId => stopChatMessageResponding('', taskId, isInstalledApp, appId),
+    (conversationId, chatList) => setConversationChatList(
+      (prevConversationChatList: Record<string, any>) => ({...prevConversationChatList, [appId || '']: {...prevConversationChatList?.[appId || ''], [conversationId]: chatList}})
+    )
   )
 
   useEffect(() => {
@@ -129,7 +134,8 @@ const ChatWrapper = () => {
   return (
     <Chat
       config={appConfig}
-      chatList={chatList}
+      chatList={conversationChatList?.[appId || '']?.[currentConversationId] || []}
+      // chatList={chatList}
       isResponding={isResponding}
       chatContainerInnerClassName={`mx-auto pt-6 w-full max-w-[720px] ${isMobile && 'px-4'}`}
       chatFooterClassName='pb-4'

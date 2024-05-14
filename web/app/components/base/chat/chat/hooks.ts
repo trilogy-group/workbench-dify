@@ -76,6 +76,8 @@ export const useChat = (
   },
   prevChatList?: ChatItem[],
   stopChat?: (taskId: string) => void,
+  // globalConversationChatList?: Record<string, any>,
+  updateGlobalChatListForApp?: (conversationId: string, chatList: any) => void
 ) => {
   const { t } = useTranslation()
   const { notify } = useToastContext()
@@ -98,8 +100,13 @@ export const useChat = (
     }
   }, [])
 
+  // useEffect(() => {
+  //   console.log("Chat list for conversation", connversationId.current, "updated to", chatList)
+  // }, [chatList])
+
   const handleUpdateChatList = useCallback((newChatList: ChatItem[]) => {
     setChatList(newChatList)
+    if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
     chatListRef.current = newChatList
   }, [])
   const handleResponding = useCallback((isResponding: boolean) => {
@@ -187,6 +194,10 @@ export const useChat = (
         draft.push({ ...responseItem })
       })
     handleUpdateChatList(newListWithAnswer)
+    // if(updateGlobalChatListForApp){
+    //   console.log("updating global conversation chat list")
+    //   updateGlobalChatListForApp(connversationId.current, newListWithAnswer)
+    // }
   }, [handleUpdateChatList])
 
   const handleSend = useCallback(async (
@@ -226,6 +237,7 @@ export const useChat = (
 
     const newList = [...chatListRef.current, questionItem, placeholderAnswerItem]
     handleUpdateChatList(newList)
+    // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newList)
 
     // answer
     const responseItem: ChatItem = {
@@ -267,6 +279,7 @@ export const useChat = (
       {
         isPublicAPI,
         onData: (message: string, isFirstMessage: boolean, { conversationId: newConversationId, messageId, taskId }: any) => {
+          console.log("Received data from backend for conversation ID", connversationId.current)
           if (!isAgentMode) {
             responseItem.content = responseItem.content + message
           }
@@ -296,6 +309,7 @@ export const useChat = (
           })
         },
         async onCompleted(hasError?: boolean) {
+          console.log("Conversation has completed for the ID", connversationId.current)
           handleResponding(false)
 
           if (hasError)
@@ -350,6 +364,7 @@ export const useChat = (
               }
             })
             handleUpdateChatList(newChatList)
+            // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
           }
           if (config?.suggested_questions_after_answer?.enabled && !hasStopResponded.current && onGetSuggestedQuestions) {
             const { data }: any = await onGetSuggestedQuestions(
@@ -417,6 +432,7 @@ export const useChat = (
                 })
               })
             handleUpdateChatList(newListWithAnswer)
+            // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newListWithAnswer)
             return
           }
           responseItem.citation = messageEnd.metadata?.retriever_resources || []
@@ -430,6 +446,7 @@ export const useChat = (
               draft.push({ ...responseItem })
             })
           handleUpdateChatList(newListWithAnswer)
+          // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newListWithAnswer)
         },
         onMessageReplace: (messageReplace) => {
           responseItem.content = messageReplace.answer
@@ -440,6 +457,7 @@ export const useChat = (
             draft.splice(draft.findIndex(item => item.id === placeholderAnswerId), 1)
           })
           handleUpdateChatList(newChatList)
+          // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
         },
         onWorkflowStarted: ({ workflow_run_id, task_id }) => {
           taskIdRef.current = task_id
@@ -448,44 +466,52 @@ export const useChat = (
             status: WorkflowRunningStatus.Running,
             tracing: [],
           }
-          handleUpdateChatList(produce(chatListRef.current, (draft) => {
+          const newChatList = produce(chatListRef.current, (draft) => {
             const currentIndex = draft.findIndex(item => item.id === responseItem.id)
             draft[currentIndex] = {
               ...draft[currentIndex],
               ...responseItem,
             }
-          }))
+          })
+          handleUpdateChatList(newChatList)
+          // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
         },
         onWorkflowFinished: ({ data }) => {
           responseItem.workflowProcess!.status = data.status as WorkflowRunningStatus
-          handleUpdateChatList(produce(chatListRef.current, (draft) => {
+          const newChatList = produce(chatListRef.current, (draft) => {
             const currentIndex = draft.findIndex(item => item.id === responseItem.id)
             draft[currentIndex] = {
               ...draft[currentIndex],
               ...responseItem,
             }
-          }))
+          })
+          handleUpdateChatList(newChatList)
+          // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
         },
         onNodeStarted: ({ data }) => {
           responseItem.workflowProcess!.tracing!.push(data as any)
-          handleUpdateChatList(produce(chatListRef.current, (draft) => {
+          const newChatList = produce(chatListRef.current, (draft) => {
             const currentIndex = draft.findIndex(item => item.id === responseItem.id)
             draft[currentIndex] = {
               ...draft[currentIndex],
               ...responseItem,
             }
-          }))
+          })
+          handleUpdateChatList(newChatList)
+          // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
         },
         onNodeFinished: ({ data }) => {
           const currentIndex = responseItem.workflowProcess!.tracing!.findIndex(item => item.node_id === data.node_id)
           responseItem.workflowProcess!.tracing[currentIndex] = data as any
-          handleUpdateChatList(produce(chatListRef.current, (draft) => {
+          const newChatList = produce(chatListRef.current, (draft) => {
             const currentIndex = draft.findIndex(item => item.id === responseItem.id)
             draft[currentIndex] = {
               ...draft[currentIndex],
               ...responseItem,
             }
-          }))
+          })
+          handleUpdateChatList(newChatList)
+          // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
         },
       })
     return true
@@ -501,7 +527,7 @@ export const useChat = (
   ])
 
   const handleAnnotationEdited = useCallback((query: string, answer: string, index: number) => {
-    handleUpdateChatList(chatListRef.current.map((item, i) => {
+    const newChatList = chatListRef.current.map((item, i) => {
       if (i === index - 1) {
         return {
           ...item,
@@ -519,10 +545,12 @@ export const useChat = (
         }
       }
       return item
-    }))
+    })
+    handleUpdateChatList(newChatList)
+    // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
   }, [handleUpdateChatList])
   const handleAnnotationAdded = useCallback((annotationId: string, authorName: string, query: string, answer: string, index: number) => {
-    handleUpdateChatList(chatListRef.current.map((item, i) => {
+    const newChatList = chatListRef.current.map((item, i) => {
       if (i === index - 1) {
         return {
           ...item,
@@ -549,10 +577,12 @@ export const useChat = (
         return answerItem
       }
       return item
-    }))
+    })
+    handleUpdateChatList(newChatList)
+    // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
   }, [handleUpdateChatList])
   const handleAnnotationRemoved = useCallback((index: number) => {
-    handleUpdateChatList(chatListRef.current.map((item, i) => {
+    const newChatList = chatListRef.current.map((item, i) => {
       if (i === index) {
         return {
           ...item,
@@ -564,7 +594,9 @@ export const useChat = (
         }
       }
       return item
-    }))
+    })
+    handleUpdateChatList(newChatList)
+    // if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
   }, [handleUpdateChatList])
 
   return {
