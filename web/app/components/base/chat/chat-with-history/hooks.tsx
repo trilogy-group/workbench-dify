@@ -61,9 +61,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
       changeLanguage(appData.site.default_language)
   }, [appData])
 
-  const [conversationIdInfo, setConversationIdInfo] = useLocalStorageState<Record<string, string>>(CONVERSATION_ID_INFO, {
-    defaultValue: {},
-  })
+  const [conversationIdInfo, setConversationIdInfo] = useState<Record<string, string>>({})
   const [conversationChatList, setConversationChatList] = useLocalStorageState<Record<string, any>>(CONVERSATION_INFO, {
     defaultValue: {},
   })
