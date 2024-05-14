@@ -374,7 +374,13 @@
                     "awslogs-region": "us-east-1",
                     "awslogs-stream-prefix": "ecs"
                 }
-            }
+            },
+            "portMappings": [
+                {
+                    "containerPort": 5432,
+                    "hostPort": 5432
+                }
+            ]
         },
         {
             "essential": true,
@@ -417,7 +423,13 @@
             },
             "memoryReservation": 2048,
             "cpu": 64,
-            "name": "redis"
+            "name": "redis",
+            "portMappings": [
+                {
+                    "containerPort": 6379,
+                    "hostPort": 6379
+                }
+            ]
         },
         {
             "environment": [
@@ -753,13 +765,13 @@
             "name": "worker",
             "cpu": 256,
             "logConfiguration": {
-       "logDriver": "awslogs",
-       "options": {
-           "awslogs-group": "/ecs/workbench-dify",
-           "awslogs-region": "us-east-1",
-           "awslogs-stream-prefix": "ecs"
-       }
-   },
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/workbench-dify",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
             "memoryReservation": 2048,
             "memory": 8192
         }
