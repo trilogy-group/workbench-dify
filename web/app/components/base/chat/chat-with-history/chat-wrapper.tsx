@@ -4,7 +4,7 @@ import type {
   ChatConfig,
   OnSend,
 } from '../types'
-import { useChat} from '../chat/hooks'
+import { useChat } from '../chat/hooks'
 import { useChatWithHistoryContext } from './context'
 import Header from './header'
 import ConfigPanel from './config-panel'
@@ -22,7 +22,7 @@ const ChatWrapper = () => {
     currentConversationItem,
     inputsForms,
     newConversationInputs,
-    handleNewConversationCompleted,
+    handleConversationCompleted,
     handleNewConversationStarted,
     isMobile,
     isInstalledApp,
@@ -32,6 +32,7 @@ const ChatWrapper = () => {
     currentChatInstanceRef,
     conversationChatList,
     setConversationChatList,
+    handleConversationMessageSend
   } = useChatWithHistoryContext()
   const appConfig = useMemo(() => {
     const config = appParams || {}
@@ -72,7 +73,7 @@ const ChatWrapper = () => {
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,
       conversation_id: currentConversationId,
     }
-
+    handleConversationMessageSend(currentConversationId)
     if (appConfig?.file_upload?.image.enabled && files?.length)
       data.files = files
 
@@ -81,7 +82,7 @@ const ChatWrapper = () => {
       data,
       {
         onGetSuggestedQuestions: responseItemId => fetchSuggestedQuestions(responseItemId, isInstalledApp, appId),
-        onConversationComplete: currentConversationId ? undefined : handleNewConversationCompleted,
+        onConversationComplete: handleConversationCompleted,
         onConversationFirstMessage: currentConversationId ? undefined : handleNewConversationStarted,
         isPublicAPI: !isInstalledApp,
       },
@@ -92,7 +93,7 @@ const ChatWrapper = () => {
     currentConversationItem,
     handleSend,
     newConversationInputs,
-    handleNewConversationCompleted,
+    handleConversationCompleted,
     handleNewConversationStarted,
     isInstalledApp,
     appId,

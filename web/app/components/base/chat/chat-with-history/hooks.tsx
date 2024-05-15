@@ -266,6 +266,13 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     mutateAppConversationData()
     mutateAppPinnedConversationData()
   }, [mutateAppConversationData, mutateAppPinnedConversationData])
+  const handleConversationMessageSend = useCallback((conversationId: string) => {
+    setOriginConversationList(prevOriginConversationList => (
+      prevOriginConversationList.map(conversationItem => 
+          conversationItem.id === conversationId ? {...conversationItem, response_status: '', tool_status: ''} : conversationItem
+      )
+    ));
+  }, [setOriginConversationList])
 
   const handlePinConversation = useCallback(async (conversationId: string) => {
     await pinConversation(isInstalledApp, appId, conversationId)
@@ -348,9 +355,14 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     }
   }, [isInstalledApp, appId, notify, t, conversationRenaming, originConversationList])
 
-  const handleNewConversationCompleted = useCallback((newConversationId: string) => {
+  const handleConversationCompleted = useCallback((conversationId: string) => {
+    setOriginConversationList(prevOriginConversationList => (
+      prevOriginConversationList.map(conversationItem => 
+          conversationItem.id === conversationId ? {...conversationItem, response_status: 'COMPLETE', tool_status: 'COMPLETE'} : conversationItem
+      )
+    ));
     mutateAppConversationData()
-  }, [mutateAppConversationData, handleConversationIdInfoChange])
+  }, [mutateAppConversationData, setOriginConversationList])
 
   const handleNewConversationStarted = useCallback((newConversationId: string) => {
     setNewConversationId(newConversationId)
@@ -405,13 +417,14 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     handleDeleteConversation,
     conversationRenaming,
     handleRenameConversation,
-    handleNewConversationCompleted,
+    handleConversationCompleted,
     handleNewConversationStarted,
     newConversationId,
     chatShouldReloadKey,
     handleFeedback,
     currentChatInstanceRef,
     conversationChatList, 
-    setConversationChatList
+    setConversationChatList,
+    handleConversationMessageSend
   }
 }

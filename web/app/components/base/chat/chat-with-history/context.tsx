@@ -40,7 +40,7 @@ export type ChatWithHistoryContextValue = {
   handleDeleteConversation: (conversationId: string, callback: Callback) => void
   conversationRenaming: boolean
   handleRenameConversation: (conversationId: string, newName: string, callback: Callback) => void
-  handleNewConversationCompleted: (newConversationId: string) => void
+  handleConversationCompleted: (newConversationId: string) => void
   handleNewConversationStarted: (newConversationId: string) => void
   chatShouldReloadKey: string
   isMobile: boolean
@@ -50,6 +50,7 @@ export type ChatWithHistoryContextValue = {
   currentChatInstanceRef: RefObject<{ handleStop: () => void }>
   conversationChatList: ConversationChatList
   setConversationChatList: React.Dispatch<React.SetStateAction<ConversationChatList>>;
+  handleConversationMessageSend: (conversationId: string) => void
 }
 
 export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>({
@@ -69,7 +70,7 @@ export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>
   handleDeleteConversation: () => {},
   conversationRenaming: false,
   handleRenameConversation: () => {},
-  handleNewConversationCompleted: () => {},
+  handleConversationCompleted: () => {},
   handleNewConversationStarted: () => {},
   chatShouldReloadKey: '',
   isMobile: false,
@@ -78,5 +79,6 @@ export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>
   currentChatInstanceRef: { current: { handleStop: () => {} } },
   conversationChatList: {}, 
   setConversationChatList: () => {},
+  handleConversationMessageSend: () => {}
 })
 export const useChatWithHistoryContext = () => useContext(ChatWithHistoryContext)
