@@ -516,6 +516,24 @@ class Conversation(db.Model):
     is_deleted = db.Column(db.Boolean, nullable=False, server_default=db.text('false'))
 
     @property
+    def tool_status(self):
+        last_message = self.messages[-1] if self.messages else None
+        if last_message and len(last_message.agent_thoughts):
+            return (
+                "COMPLETE" if all([(thought.tool and thought.observation) or (not thought.tool and not thought.observation) for thought in last_message.agent_thoughts]) 
+                else "INPROGRESS" if any([thought.tool for thought in last_message.agent_thoughts])
+                else "NOINVOCATION"
+            )
+        return None
+
+    @property
+    def response_status(self):
+        last_message = self.messages[-1] if self.messages else None
+        if last_message and len(last_message.agent_thoughts):
+            return "COMPLETE" if last_message.answer else "INPROGRESS"
+        return None
+
+    @property
     def model_config(self):
         model_config = {}
         if self.mode == AppMode.ADVANCED_CHAT.value:
