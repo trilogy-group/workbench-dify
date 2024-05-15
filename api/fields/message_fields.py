@@ -81,7 +81,5 @@ message_fields = {
 message_infinite_scroll_pagination_fields = {
     'limit': fields.Integer,
     'has_more': fields.Boolean,
-    'data': fields.List(fields.Nested(message_fields)),
-    'tool_status': fields.String(default=None), 
-    'response_status': fields.String(default=None)
+    'data': fields.List(fields.Nested(message_fields))
 }

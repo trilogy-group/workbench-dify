@@ -189,7 +189,9 @@ simple_conversation_fields = {
     'inputs': fields.Raw,
     'status': fields.String,
     'introduction': fields.String,
-    'created_at': TimestampField
+    'created_at': TimestampField,
+    'tool_status': fields.String(default=None), 
+    'response_status': fields.String(default=None)
 }
 
 conversation_infinite_scroll_pagination_fields = {
