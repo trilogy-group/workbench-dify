@@ -74,8 +74,8 @@ class MessageService:
             logging.info(f"Agent Thoughts {history_messages[-1].agent_thoughts[0].observation} {history_messages[-1].agent_thoughts[0].tool}. {history_messages[-1].answer}")
             response_status = "COMPLETE" if history_messages[-1].answer else "INPROGRESS"
             tool_status = (
-                "COMPLETE" if history_messages[-1].agent_thoughts[0].tool and history_messages[-1].agent_thoughts[0].observation 
-                else "INPROGRESS" if history_messages[-1].agent_thoughts[0].tool 
+                "COMPLETE" if all([thought.tool and thought.observation for thought in history_messages[-1].agent_thoughts]) 
+                else "INPROGRESS" if any([thought.tool for thought in history_messages[-1].agent_thoughts])
                 else "NOINVOCATION"
             )
         else:
