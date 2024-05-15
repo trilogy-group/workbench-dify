@@ -72,7 +72,7 @@ class ToolEngine:
 
                     response = [ToolInvokeMessage(
                         type=ToolInvokeMessage.MessageType.TEXT, 
-                        message=f"Having recieved a multiprocessing request, I created {len(queries)} chats with a unique task each. Please refresh the page to see them.",
+                        message=f"Having recieved a multiprocessing request, I created {len(queries)} chats with a unique task running in each.",
                         save_as='')]
                     meta = ToolInvokeMeta(time_cost=0.0)
                 except Exception as e:
