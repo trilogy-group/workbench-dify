@@ -1,5 +1,6 @@
 import json
 from typing import Optional, Union
+import logging
 
 from core.app.apps.advanced_chat.app_config_manager import AdvancedChatAppConfigManager
 from core.app.entities.app_invoke_entities import InvokeFrom
@@ -69,10 +70,24 @@ class MessageService:
 
         history_messages = list(reversed(history_messages))
 
+        if len(history_messages[-1].agent_thoughts):
+            logging.info(f"Agent Thoughts {history_messages[-1].agent_thoughts[0].observation} {history_messages[-1].agent_thoughts[0].tool}. {history_messages[-1].answer}")
+            response_status = "COMPLETE" if history_messages[-1].answer else "INPROGRESS"
+            tool_status = (
+                "COMPLETE" if all([thought.tool and thought.observation for thought in history_messages[-1].agent_thoughts]) 
+                else "INPROGRESS" if any([thought.tool for thought in history_messages[-1].agent_thoughts])
+                else "NOINVOCATION"
+            )
+        else:
+            response_status, tool_status = None, None
+
+
         return InfiniteScrollPagination(
             data=history_messages,
             limit=limit,
-            has_more=has_more
+            has_more=has_more,
+            tool_status=tool_status,
+            response_status=response_status
         )
 
     @classmethod
