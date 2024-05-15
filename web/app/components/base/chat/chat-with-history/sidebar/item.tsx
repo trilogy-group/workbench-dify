@@ -7,6 +7,7 @@ import { useHover } from 'ahooks'
 import type { ConversationItem } from '@/models/share'
 import { MessageDotsCircle } from '@/app/components/base/icons/src/vender/solid/communication'
 import ItemOperation from '@/app/components/explore/item-operation'
+import { CheckCircleIcon } from '@heroicons/react/20/solid'
 
 type ItemProps = {
   isPin?: boolean
@@ -24,7 +25,7 @@ const Item: FC<ItemProps> = ({
 }) => {
   const ref = useRef(null)
   const isHovering = useHover(ref)
-
+  console.log("item is", item) // TODO: remove
   return (
     <div
       ref={ref}
@@ -36,7 +37,13 @@ const Item: FC<ItemProps> = ({
       `}
       onClick={() => onChangeConversation(item.id)}
     >
-      <MessageDotsCircle className={`shrink-0 mt-1 mr-2 w-4 h-4 text-gray-400 ${currentConversationId === item.id && 'text-primary-600'}`} />
+      {
+        item.tool_status === "COMPLETE" && item.response_status === "COMPLETE" ? (
+          <CheckCircleIcon className={`shrink-0 mt-1 mr-2 w-4 h-4 text-green-500 ${currentConversationId === item.id && 'text-primary-600'}`} />
+        ) : (
+          <MessageDotsCircle className={`shrink-0 mt-1 mr-2 w-4 h-4 text-gray-400 ${currentConversationId === item.id && 'text-primary-600'}`} />
+        )
+      }
       <div className='grow py-0.5 break-all' title={item.name}>{item.name}</div>
       {item.id !== '' && (
         <div className='shrink-0 h-6' onClick={e => e.stopPropagation()}>

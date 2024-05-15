@@ -180,6 +180,8 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
         name: t('share.chat.newChatDefaultName'),
         inputs: {},
         introduction: '',
+        tool_status: '',
+        response_status: ''
       })
     }
     return data
@@ -236,6 +238,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   }, [setShowConfigPanelBeforeChat, setShowNewConversationItemInList, checkInputsRequired])
   const currentChatInstanceRef = useRef<{ handleStop: () => void }>({ handleStop: () => {} })
   const handleChangeConversation = useCallback((conversationId: string) => {
+    console.log("changing conversation")
     // currentChatInstanceRef.current.handleStop()
     setNewConversationId('')
     handleConversationIdInfoChange(conversationId)
