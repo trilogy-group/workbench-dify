@@ -2,6 +2,7 @@ import logging
 
 from flask_restful import reqparse
 from werkzeug.exceptions import InternalServerError, NotFound
+from flask import request
 
 import services
 from controllers.web import api
@@ -105,14 +106,23 @@ class ChatApi(WebApiResource):
 
         streaming = args['response_mode'] == 'streaming'
         args['auto_generate_name'] = False
-
+        request_info = {
+            "url": request.url,
+            "bearer_token": request.headers.get('Authorization'),
+            "supports_spawning": True,
+            "query": args['query'],
+            "request_body": args,
+            "app_id": app_model.id
+        }
+        logging.info(f"RECIEVED REQUEST Deployed WEBAPI' {request_info['query']}' to {request_info['url']}")
         try:
             response = AppGenerateService.generate(
                 app_model=app_model,
                 user=end_user,
                 args=args,
                 invoke_from=InvokeFrom.WEB_APP,
-                streaming=streaming
+                streaming=streaming,
+                request_info=request_info
             )
 
             return helper.compact_generate_response(response)

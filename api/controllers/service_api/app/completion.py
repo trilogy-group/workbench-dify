@@ -2,6 +2,7 @@ import logging
 
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import InternalServerError, NotFound
+from flask import request
 
 import services
 from controllers.service_api import api
@@ -106,14 +107,23 @@ class ChatApi(Resource):
         args = parser.parse_args()
 
         streaming = args['response_mode'] == 'streaming'
-
+        request_info = {
+            "url": request.url,
+            "bearer_token": request.headers.get('Authorization'),
+            "supports_spawning": True,
+            "query": args['query'],
+            "request_body": args,
+            "app_id": app_model.id
+        }
+        logging.info(f"RECIEVED REQUEST Resource' {request_info['query']}' to {request_info['url']}")
         try:
             response = AppGenerateService.generate(
                 app_model=app_model,
                 user=end_user,
                 args=args,
                 invoke_from=InvokeFrom.SERVICE_API,
-                streaming=streaming
+                streaming=streaming,
+                request_info=request_info
             )
 
             return helper.compact_generate_response(response)
