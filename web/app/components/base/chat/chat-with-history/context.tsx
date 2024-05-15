@@ -6,6 +6,7 @@ import type {
   Callback,
   ChatConfig,
   ChatItem,
+  ConversationChatList,
   Feedback,
 } from '../types'
 import type {
@@ -47,8 +48,8 @@ export type ChatWithHistoryContextValue = {
   appId?: string
   handleFeedback: (messageId: string, feedback: Feedback) => void
   currentChatInstanceRef: RefObject<{ handleStop: () => void }>
-  conversationChatList: Record<string, any> | undefined
-  setConversationChatList: (prevConversationChatList: Record<string, any>) => void
+  conversationChatList: ConversationChatList
+  setConversationChatList: React.Dispatch<React.SetStateAction<ConversationChatList>>;
 }
 
 export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>({
@@ -76,6 +77,6 @@ export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>
   handleFeedback: () => {},
   currentChatInstanceRef: { current: { handleStop: () => {} } },
   conversationChatList: {}, 
-  setConversationChatList: (prevConversationChatList) => {},
+  setConversationChatList: () => {},
 })
 export const useChatWithHistoryContext = () => useContext(ChatWithHistoryContext)

@@ -13,6 +13,7 @@ import type {
   Callback,
   ChatConfig,
   ChatItem,
+  ConversationChatList,
   Feedback,
 } from '../types'
 import { CONVERSATION_ID_INFO } from '../constants'
@@ -64,7 +65,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const [conversationIdInfo, setConversationIdInfo] = useLocalStorageState<Record<string, string>>(CONVERSATION_ID_INFO, {
     defaultValue: {},
   })
-  const [conversationChatList, setConversationChatList] = useState<Record<string, any>>({})
+  const [conversationChatList, setConversationChatList] = useState<ConversationChatList>({})
   const currentConversationId = useMemo(() => conversationIdInfo?.[appId || ''] || '', [appId, conversationIdInfo])
   const handleConversationIdInfoChange = useCallback((changeConversationId: string) => {
     if (appId) {
@@ -90,11 +91,8 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const { data: appConversationData, isLoading: appConversationDataLoading, mutate: mutateAppConversationData } = useSWR(['appConversationData', isInstalledApp, appId, false], () => fetchConversations(isInstalledApp, appId, undefined, false, 100))
   const { data: appChatListData, isLoading: appChatListDataLoading } = useSWR(chatShouldReloadKey ? ['appChatList', chatShouldReloadKey, isInstalledApp, appId] : null, () => fetchChatList(chatShouldReloadKey, isInstalledApp, appId))
 
-  useEffect(() => {
-  }, [conversationChatList])
   const appPrevChatList = useMemo(() => {
     if(!currentConversationId) return []
-    console.log("conversation chat list for current conversation ID", currentConversationId, "Is", conversationChatList?.[appId || '']?.[currentConversationId])
     if (!conversationChatList?.[appId || '']?.[currentConversationId] || conversationChatList?.[appId || '']?.[currentConversationId]?.length === 0){
       const data = appChatListData?.data || []
       const chatList: ChatItem[] = []
@@ -231,7 +229,6 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     return true
   }, [inputsForms, notify, t])
   const handleStartChat = useCallback(() => {
-    console.log("Start chat called")
     if (checkInputsRequired()) {
       setShowConfigPanelBeforeChat(false)
       setShowNewConversationItemInList(true)
