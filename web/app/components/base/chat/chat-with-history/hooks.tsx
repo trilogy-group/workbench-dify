@@ -356,12 +356,12 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
       return {
         ...prevConversations,
         [appId || '']: remainingConversations
-      }
+      } // removes conversationId '' (empty string) from conversationChatList
     })
     handleConversationIdInfoChange(newConversationId)
     setShowNewConversationItemInList(false)
     mutateAppConversationData()
-  }, [handleConversationIdInfoChange])
+  }, [mutateAppConversationData, handleConversationIdInfoChange])
 
   const handleFeedback = useCallback(async (messageId: string, feedback: Feedback) => {
     await updateFeedback({ url: `/messages/${messageId}/feedbacks`, body: { rating: feedback.rating } }, isInstalledApp, appId)
