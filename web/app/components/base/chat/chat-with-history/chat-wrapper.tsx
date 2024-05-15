@@ -43,7 +43,6 @@ const ChatWrapper = () => {
     } as ChatConfig
   }, [appParams, currentConversationItem?.introduction, currentConversationId])
   const {
-    chatList,
     handleSend,
     handleStop,
     isResponding,
@@ -139,7 +138,6 @@ const ChatWrapper = () => {
     <Chat
       config={appConfig}
       chatList={conversationChatList?.[appId || '']?.[currentConversationId] || []}
-      // chatList={chatList}
       isResponding={isResponding}
       chatContainerInnerClassName={`mx-auto pt-6 w-full max-w-[720px] ${isMobile && 'px-4'}`}
       chatFooterClassName='pb-4'

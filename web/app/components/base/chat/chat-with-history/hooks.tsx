@@ -15,7 +15,7 @@ import type {
   ChatItem,
   Feedback,
 } from '../types'
-import { CONVERSATION_ID_INFO, CONVERSATION_INFO } from '../constants'
+import { CONVERSATION_ID_INFO } from '../constants'
 import {
   delConversation,
   fetchAppInfo,
@@ -68,7 +68,6 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const currentConversationId = useMemo(() => conversationIdInfo?.[appId || ''] || '', [appId, conversationIdInfo])
   const handleConversationIdInfoChange = useCallback((changeConversationId: string) => {
     if (appId) {
-      console.log("conversation id info is", conversationIdInfo)
       setConversationIdInfo({
         ...conversationIdInfo,
         [appId || '']: changeConversationId,
@@ -79,7 +78,6 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
 
   const [newConversationId, setNewConversationId] = useState('')
   const chatShouldReloadKey = useMemo(() => {
-    console.log("currentConversationID", currentConversationId, " newConversationId", newConversationId);
     if (currentConversationId === newConversationId)
       return ''
 
@@ -88,8 +86,8 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
 
   const { data: appParams } = useSWR(['appParams', isInstalledApp, appId], () => fetchAppParams(isInstalledApp, appId))
   const { data: appMeta } = useSWR(['appMeta', isInstalledApp, appId], () => fetchAppMeta(isInstalledApp, appId))
-  const { data: appPinnedConversationData, mutate: mutateAppPinnedConversationData } = useSWR(['appConversationData', isInstalledApp, appId, true], () => fetchConversations(isInstalledApp, appId, undefined, true, 20))
-  const { data: appConversationData, isLoading: appConversationDataLoading, mutate: mutateAppConversationData } = useSWR(['appConversationData', isInstalledApp, appId, false], () => fetchConversations(isInstalledApp, appId, undefined, false, 90))
+  const { data: appPinnedConversationData, mutate: mutateAppPinnedConversationData } = useSWR(['appConversationData', isInstalledApp, appId, true], () => fetchConversations(isInstalledApp, appId, undefined, true, 100))
+  const { data: appConversationData, isLoading: appConversationDataLoading, mutate: mutateAppConversationData } = useSWR(['appConversationData', isInstalledApp, appId, false], () => fetchConversations(isInstalledApp, appId, undefined, false, 100))
   const { data: appChatListData, isLoading: appChatListDataLoading } = useSWR(chatShouldReloadKey ? ['appChatList', chatShouldReloadKey, isInstalledApp, appId] : null, () => fetchChatList(chatShouldReloadKey, isInstalledApp, appId))
 
   useEffect(() => {
@@ -242,12 +240,10 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const currentChatInstanceRef = useRef<{ handleStop: () => void }>({ handleStop: () => {} })
   const handleChangeConversation = useCallback((conversationId: string) => {
     // currentChatInstanceRef.current.handleStop()
-    console.log("Handle change conversation called")
     setNewConversationId('')
     handleConversationIdInfoChange(conversationId)
 
     if (conversationId === '' && !checkInputsRequired(true)){
-      console.log("Creating a new conversation")
       setShowConfigPanelBeforeChat(true)
     }
     else
@@ -256,7 +252,6 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const handleNewConversation = useCallback(() => {
     // currentChatInstanceRef.current.handleStop()
     setNewConversationId('')
-    console.log("Show new conversation item is", showNewConversationItemInList)
     if (showNewConversationItemInList) {
       handleChangeConversation('')
     }
@@ -354,12 +349,10 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   }, [isInstalledApp, appId, notify, t, conversationRenaming, originConversationList])
 
   const handleNewConversationCompleted = useCallback((newConversationId: string) => {
-    console.log("Handle New converstaion Completed is called..")
     mutateAppConversationData()
   }, [mutateAppConversationData, handleConversationIdInfoChange])
 
   const handleNewConversationStarted = useCallback((newConversationId: string) => {
-    console.log("Handle New converstaion Started is called for newConversationId: ", newConversationId)
     setNewConversationId(newConversationId)
     setConversationChatList(prevConversations => {
       const {'': _, ...remainingConversations} = prevConversations[appId || '']
