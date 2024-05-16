@@ -14,6 +14,9 @@ import type {
   PromptVariable,
   VisionFile,
 } from '../types'
+import type {
+  ConversationItem,
+} from '@/models/share'
 import { TransferMethod } from '@/types/app'
 import { useToastContext } from '@/app/components/base/toast'
 import { ssePost } from '@/service/base'
@@ -78,13 +81,14 @@ export const useChat = (
   prevChatList?: ChatItem[],
   stopChat?: (taskId: string) => void,
   currentConversationId?: string,
+  currentConversationItem?: ConversationItem,
   updateGlobalChatListForApp?: (conversationId: string, chatList: any) => void
 ) => {
   const { t } = useTranslation()
   const { notify } = useToastContext()
   const connversationId = useRef(currentConversationId || '')
   const hasStopResponded = useRef(false)
-  const [isResponding, setIsResponding] = useState(false)
+  const [isResponding, setIsResponding] = useState(currentConversationItem?.tool_status !== "COMPLETED" || false)
   const isRespondingRef = useRef(false)
   const [chatList, setChatList] = useState<ChatItem[]>(prevChatList || [])
   const chatListRef = useRef<ChatItem[]>(prevChatList || [])

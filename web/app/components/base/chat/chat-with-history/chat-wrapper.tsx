@@ -18,6 +18,7 @@ const ChatWrapper = () => {
   const {
     appParams,
     appPrevChatList,
+    conversationList,
     currentConversationId,
     currentConversationItem,
     inputsForms,
@@ -57,6 +58,7 @@ const ChatWrapper = () => {
     appPrevChatList,
     taskId => stopChatMessageResponding('', taskId, isInstalledApp, appId),
     currentConversationId,
+    conversationList.find(conversation => conversation.id === currentConversationId),
     (conversationId, chatList) => setConversationChatList(
       (prevConversationChatList: Record<string, any>) => ({...prevConversationChatList, [appId || '']: {...prevConversationChatList?.[appId || ''], [conversationId]: chatList}})
     )
