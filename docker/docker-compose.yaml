@@ -3,7 +3,7 @@ services:
   # API service
   api:
     build: 
-      context: /workspace/workbench-dify/api
+      context: ../api
       dockerfile: Dockerfile
     restart: always
     environment:
