@@ -1,0 +1,29 @@
+identity: 
+  name: chat_spawner_tool 
+  author: Dify 
+  label: 
+    en_US: Internal Chat Spawner Tool
+  human: 
+    en_US: Handles multiprocessing requests for tools with this capability. Not for direct use in agents or workflows.
+  llm: Manages multiprocessing requests internally.
+
+parameters: 
+  - name: tenant_id
+    type: string 
+    required: true 
+    label: 
+      en_US: Tenant ID
+    human_description: 
+      en_US: Identifier for the tenant.
+    llm_description: Tenant identifier, not visible to users.
+    form: form 
+
+  - name: request_info  
+    type: string 
+    required: true 
+    label: 
+      en_US: Chat Request Info 
+    human_description: 
+      en_US: Contains all necessary details to simulate a chat message request.
+    llm_description: Includes essential details for simulating a chat message request.
+    form: form 
