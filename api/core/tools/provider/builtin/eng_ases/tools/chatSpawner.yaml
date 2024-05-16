@@ -3,6 +3,7 @@ identity:
   author: Dify 
   label: 
     en_US: Internal Chat Spawner Tool
+description:
   human: 
     en_US: Handles multiprocessing requests for tools with this capability. Not for direct use in agents or workflows.
   llm: Manages multiprocessing requests internally.
@@ -15,7 +16,7 @@ parameters:
       en_US: Tenant ID
     human_description: 
       en_US: Identifier for the tenant.
-    llm_description: Tenant identifier, not visible to users.
+    llm_description: Tenant identifier, unknown to users.
     form: form 
 
   - name: request_info  
