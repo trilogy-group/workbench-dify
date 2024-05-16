@@ -114,7 +114,7 @@ def get_chat_history(conversation_id:str, app_id:str) -> List[Dict[str, Any]]:
     ).first()
 
     if len(conversation.messages):
-        history = conversation.messages[-1].message if conversation.messages[-1].message.strip() else conversation.messages[-2].message
+        history = conversation.messages[-1].message if conversation.messages[-1].message else conversation.messages[-2].message
         history = history[1:] if history[0]['role'] == 'system' else history
         history = [{k:v for k, v in message.items() if k in ['role', 'content', 'text']} for message in history]
         return conversation.summary, history

@@ -7,6 +7,8 @@ export type ConversationItem = {
   name: string
   inputs: Record<string, any> | null
   introduction: string
+  tool_status: string
+  response_status: string
 }
 
 export type SiteInfo = {

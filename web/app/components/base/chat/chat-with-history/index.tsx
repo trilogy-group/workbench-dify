@@ -131,12 +131,16 @@ const ChatWithHistoryWrap: FC<ChatWithHistoryWrapProps> = ({
     handleDeleteConversation,
     conversationRenaming,
     handleRenameConversation,
-    handleNewConversationCompleted,
+    handleConversationCompleted,
+    handleNewConversationStarted,
     chatShouldReloadKey,
     isInstalledApp,
     appId,
     handleFeedback,
     currentChatInstanceRef,
+    conversationChatList, 
+    setConversationChatList,
+    handleConversationMessageSend
   } = useChatWithHistory(installedAppInfo)
 
   return (
@@ -164,13 +168,17 @@ const ChatWithHistoryWrap: FC<ChatWithHistoryWrapProps> = ({
       handleDeleteConversation,
       conversationRenaming,
       handleRenameConversation,
-      handleNewConversationCompleted,
+      handleConversationCompleted,
+      handleNewConversationStarted,
       chatShouldReloadKey,
       isMobile,
       isInstalledApp,
       appId,
       handleFeedback,
       currentChatInstanceRef,
+      conversationChatList, 
+      setConversationChatList,
+      handleConversationMessageSend
     }}>
       <ChatWithHistory className={className} />
     </ChatWithHistoryContext.Provider>
