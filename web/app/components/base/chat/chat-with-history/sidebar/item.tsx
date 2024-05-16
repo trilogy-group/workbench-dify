@@ -25,7 +25,6 @@ const Item: FC<ItemProps> = ({
 }) => {
   const ref = useRef(null)
   const isHovering = useHover(ref)
-  console.log("item is", item) // TODO: remove
   return (
     <div
       ref={ref}
