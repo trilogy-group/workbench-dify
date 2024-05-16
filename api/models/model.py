@@ -529,9 +529,10 @@ class Conversation(db.Model):
     @property
     def response_status(self):
         last_message = self.messages[-1] if self.messages else None
-        if last_message and len(last_message.agent_thoughts):
-            return "COMPLETE" if last_message.answer else "INPROGRESS"
-        return None
+        response_status = "COMPLETE" if last_message.answer else "INPROGRESS"
+        if last_message and len(last_message.agent_thoughts) and response_status=="INPROGRESS":
+            response_status = "COMPLETE" if last_message.agent_thoughts[-1].answer else response_status
+        return response_status
 
     @property
     def model_config(self):
