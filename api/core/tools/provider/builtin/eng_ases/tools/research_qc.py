@@ -12,7 +12,7 @@ from pydantic import BaseModel, validator
 from typing import List, Union
 
 
-class ASEToolResearch(BuiltinTool):
+class ASEToolResearchQC(BuiltinTool):
     def _invoke(self, 
                 user_id: str,
                tool_parameters: Dict[str, Any], 
@@ -21,12 +21,12 @@ class ASEToolResearch(BuiltinTool):
             invoke tools
         """ 
         try:
-            logging.info(f"Research ASE Recieved {tool_parameters}")
+            logging.info(f"Research QC ASE Recieved {tool_parameters}")
 
             ase_inputs = ASEToolModel(**tool_parameters)
-            response = trigger_ase("maint_research_do", ase_inputs.dict())
+            response = trigger_ase("maint_research_qc", ase_inputs.dict())
             return self.create_text_message(text=response)
 
         except Exception as e:
             logging.info(f"Traceback: {traceback.format_exc()}")
-            raise Exception(f"Research ASE Failed. {e}")
+            raise Exception(f"Research QC ASE Failed. {e}")

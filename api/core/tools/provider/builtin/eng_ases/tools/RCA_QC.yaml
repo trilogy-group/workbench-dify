@@ -1,0 +1,48 @@
+identity: 
+  name: ase_tool_rca_qc
+  author: Dify 
+  label: 
+    en_US: RCA Quality Check Tool
+description: 
+  human: 
+    en_US: RCA QC Agent checks the quality of the root cause analysis for a bug performed by the RCA tool.
+  llm: A tool that checks the quality of the RCA performed by the ase_tool_rca tool on a github issue by analyzing issue and the RCA report. 
+parameters: 
+  - name: artifactUrls
+    type: string 
+    required: true 
+    label: 
+      en_US: Artifact URLs 
+    human_description: 
+      en_US: Provide the URLs of the artifacts related to the issue in a comma-separated list. The first URL should be the core issue link outlining the problem. The second mandatory link is the link to the RCA report.
+    llm_description: A comma-separated list of URLs needed to resolve the issue. The first URL should be of the core issue. The absence of a core issue link constitutes a bad request and should prompt a request for correction. The second url should be a link to the RCA report, it too is required.
+    form: llm 
+  - name: productName  
+    type: string 
+    required: true 
+    label: 
+      en_US: Product Name 
+    human_description: 
+      en_US: Name of the product associated with the issue.
+    llm_description: Name of the product associated with the issue. 
+    form: llm 
+  - name: dryRun 
+    type: boolean 
+    required: false 
+    default: true 
+    label: 
+      en_US: Dry Run 
+    human_description: 
+      en_US: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like.
+    llm_description: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like. 
+    form: llm 
+  - name: isMultiprocessing 
+    type: boolean 
+    required: false 
+    default: false 
+    label: 
+      en_US: Multiprocessing Request 
+    human_description: 
+      en_US: If true, instead of making a single tool run call, multiple tool runs will be made in parallel.
+    llm_description: Should be True if the user mentions its a multiprocessing request and provides multiple github issues or just says that RCA QC must be performed on each issue and report. So true if issues and reports to perform RCA QC on are separate issues.
+    form: llm 
