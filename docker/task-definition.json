@@ -332,7 +332,7 @@
             "memory": 2048,
             "memoryReservation": 512,
             "cpu": 512,
-            "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/api:api1",
+            "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/dify.api:api_tag",
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
@@ -535,7 +535,7 @@
                 }
             ],
             "essential": true,
-            "image": "346945241475.dkr.ecr.us-east-1.amazonaws.com/dify.web:web1",
+            "image": "langgenius/dify-web:0.6.5",
             "name": "web",
             "cpu": 64,
             "memory": 2048,

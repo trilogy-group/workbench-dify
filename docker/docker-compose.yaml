@@ -1,7 +1,9 @@
 version: '3'
 services:
   api:
-    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/api:api1
+    build: 
+      context: ../api
+      dockerfile: Dockerfile
     restart: always
     environment:
       MODE: api
@@ -156,7 +158,7 @@ services:
       - ./volumes/app/storage:/app/api/storage
 
   web:
-    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/dify.web:web1
+    image: "langgenius/dify-web:0.6.5"
     restart: always
     environment:
       CONSOLE_API_URL: ''
