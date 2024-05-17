@@ -5,12 +5,15 @@ services:
     build: 
       context: ../api
       dockerfile: Dockerfile
+      args:
+        - ENG_ASE_API_KEY=${ENG_ASE_API_KEY}
+        - CALLBACK_SERVICE_API_KEY=${CALLBACK_SERVICE_API_KEY}
     restart: always
     environment:
       # Startup mode, 'api' starts the API server.
       MODE: api
-      ENG_ASE_API_KEY: ""
-      CALLBACK_SERVICE_API_KEY: ""
+      ENG_ASE_API_KEY: ${ENG_ASE_API_KEY}
+      CALLBACK_SERVICE_API_KEY: ${CALLBACK_SERVICE_API_KEY}
       # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
       LOG_LEVEL: INFO
       # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
