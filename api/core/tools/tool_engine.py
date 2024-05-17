@@ -67,7 +67,7 @@ class ToolEngine:
                     # Request info should be empty for all calls except to Agent via the Explore page. isMultiprocessing defaults to False for all tools that do not have the parameter.
                     queries = split_queries(tenant_id, request_info['request_body']['conversation_id'], request_info['app_id'], request_info['query'])
                     logging.info(f"Query splitter result: {queries}")
-
+                    logging.info(f"Request Info {request_info}")
                     asyncio.run(spawn_chats(request_info, queries))
 
                     response = [ToolInvokeMessage(
