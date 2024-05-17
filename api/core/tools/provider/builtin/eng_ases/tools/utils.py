@@ -30,7 +30,7 @@ async def make_request_async(request_model: dict, query: str) -> None:
         "Authorization": request_model["bearer_token"],
         "Content-Type": "application/json"
     }
-    logging.info(f"Chat Spawner making request to {request_model["url"]}")
+    logging.info(f"Chat Spawner making request to {request_model['url']}")
     async with httpx.AsyncClient(timeout=httpx.Timeout(3.0, read=10.0), http2=True) as client:
         response = await client.post(request_model["url"], json=body, headers=headers)
     
