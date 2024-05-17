@@ -13,6 +13,7 @@ import type {
   Callback,
   ChatConfig,
   ChatItem,
+  ConversationChatList,
   Feedback,
 } from '../types'
 import { CONVERSATION_ID_INFO } from '../constants'
@@ -64,6 +65,7 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const [conversationIdInfo, setConversationIdInfo] = useLocalStorageState<Record<string, string>>(CONVERSATION_ID_INFO, {
     defaultValue: {},
   })
+  const [conversationChatList, setConversationChatList] = useState<ConversationChatList>({})
   const currentConversationId = useMemo(() => conversationIdInfo?.[appId || ''] || '', [appId, conversationIdInfo])
   const handleConversationIdInfoChange = useCallback((changeConversationId: string) => {
     if (appId) {
@@ -90,30 +92,36 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   const { data: appChatListData, isLoading: appChatListDataLoading } = useSWR(chatShouldReloadKey ? ['appChatList', chatShouldReloadKey, isInstalledApp, appId] : null, () => fetchChatList(chatShouldReloadKey, isInstalledApp, appId))
 
   const appPrevChatList = useMemo(() => {
-    const data = appChatListData?.data || []
-    const chatList: ChatItem[] = []
+    if(!currentConversationId) return []
+    if (!conversationChatList?.[appId || '']?.[currentConversationId] || conversationChatList?.[appId || '']?.[currentConversationId]?.length === 0){
+      const data = appChatListData?.data || []
+      const chatList: ChatItem[] = []
 
-    if (currentConversationId && data.length) {
-      data.forEach((item: any) => {
-        chatList.push({
-          id: `question-${item.id}`,
-          content: item.query,
-          isAnswer: false,
-          message_files: item.message_files?.filter((file: any) => file.belongs_to === 'user') || [],
+      if (currentConversationId && data.length) {
+        data.forEach((item: any) => {
+          chatList.push({
+            id: `question-${item.id}`,
+            content: item.query,
+            isAnswer: false,
+            message_files: item.message_files?.filter((file: any) => file.belongs_to === 'user') || [],
+          })
+          chatList.push({
+            id: item.id,
+            content: item.answer,
+            agent_thoughts: addFileInfos(item.agent_thoughts ? sortAgentSorts(item.agent_thoughts) : item.agent_thoughts, item.message_files),
+            feedback: item.feedback,
+            isAnswer: true,
+            citation: item.retriever_resources,
+            message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
+          })
         })
-        chatList.push({
-          id: item.id,
-          content: item.answer,
-          agent_thoughts: addFileInfos(item.agent_thoughts ? sortAgentSorts(item.agent_thoughts) : item.agent_thoughts, item.message_files),
-          feedback: item.feedback,
-          isAnswer: true,
-          citation: item.retriever_resources,
-          message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
-        })
-      })
+      }
+      setConversationChatList(prevConversationChatList => ({...prevConversationChatList, [appId || '']: {...prevConversationChatList?.[appId || ''], [currentConversationId]: chatList}}))
+      return chatList
     }
-
-    return chatList
+    else {
+      return conversationChatList[appId || ''][currentConversationId]
+    }
   }, [appChatListData, currentConversationId])
 
   const [showNewConversationItemInList, setShowNewConversationItemInList] = useState(false)
@@ -172,6 +180,8 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
         name: t('share.chat.newChatDefaultName'),
         inputs: {},
         introduction: '',
+        tool_status: '',
+        response_status: ''
       })
     }
     return data
@@ -228,19 +238,20 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   }, [setShowConfigPanelBeforeChat, setShowNewConversationItemInList, checkInputsRequired])
   const currentChatInstanceRef = useRef<{ handleStop: () => void }>({ handleStop: () => {} })
   const handleChangeConversation = useCallback((conversationId: string) => {
-    currentChatInstanceRef.current.handleStop()
+    console.log("changing conversation")
+    // currentChatInstanceRef.current.handleStop()
     setNewConversationId('')
     handleConversationIdInfoChange(conversationId)
 
-    if (conversationId === '' && !checkInputsRequired(true))
+    if (conversationId === '' && !checkInputsRequired(true)){
       setShowConfigPanelBeforeChat(true)
+    }
     else
       setShowConfigPanelBeforeChat(false)
   }, [handleConversationIdInfoChange, setShowConfigPanelBeforeChat, checkInputsRequired])
   const handleNewConversation = useCallback(() => {
-    currentChatInstanceRef.current.handleStop()
+    // currentChatInstanceRef.current.handleStop()
     setNewConversationId('')
-
     if (showNewConversationItemInList) {
       handleChangeConversation('')
     }
@@ -255,6 +266,13 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     mutateAppConversationData()
     mutateAppPinnedConversationData()
   }, [mutateAppConversationData, mutateAppPinnedConversationData])
+  const handleConversationMessageSend = useCallback((conversationId: string) => {
+    setOriginConversationList(prevOriginConversationList => (
+      prevOriginConversationList.map(conversationItem => 
+          conversationItem.id === conversationId ? {...conversationItem, response_status: '', tool_status: ''} : conversationItem
+      )
+    ));
+  }, [setOriginConversationList])
 
   const handlePinConversation = useCallback(async (conversationId: string) => {
     await pinConversation(isInstalledApp, appId, conversationId)
@@ -337,8 +355,24 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     }
   }, [isInstalledApp, appId, notify, t, conversationRenaming, originConversationList])
 
-  const handleNewConversationCompleted = useCallback((newConversationId: string) => {
+  const handleConversationCompleted = useCallback((conversationId: string) => {
+    setOriginConversationList(prevOriginConversationList => (
+      prevOriginConversationList.map(conversationItem => 
+          conversationItem.id === conversationId ? {...conversationItem, response_status: 'COMPLETE', tool_status: 'COMPLETE'} : conversationItem
+      )
+    ));
+    mutateAppConversationData()
+  }, [mutateAppConversationData, setOriginConversationList])
+
+  const handleNewConversationStarted = useCallback((newConversationId: string) => {
     setNewConversationId(newConversationId)
+    setConversationChatList(prevConversations => {
+      const {'': _, ...remainingConversations} = prevConversations[appId || '']
+      return {
+        ...prevConversations,
+        [appId || '']: remainingConversations
+      } // removes conversationId '' (empty string) from conversationChatList
+    })
     handleConversationIdInfoChange(newConversationId)
     setShowNewConversationItemInList(false)
     mutateAppConversationData()
@@ -383,10 +417,14 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
     handleDeleteConversation,
     conversationRenaming,
     handleRenameConversation,
-    handleNewConversationCompleted,
+    handleConversationCompleted,
+    handleNewConversationStarted,
     newConversationId,
     chatShouldReloadKey,
     handleFeedback,
     currentChatInstanceRef,
+    conversationChatList, 
+    setConversationChatList,
+    handleConversationMessageSend
   }
 }

@@ -18,17 +18,22 @@ const ChatWrapper = () => {
   const {
     appParams,
     appPrevChatList,
+    conversationList,
     currentConversationId,
     currentConversationItem,
     inputsForms,
     newConversationInputs,
-    handleNewConversationCompleted,
+    handleConversationCompleted,
+    handleNewConversationStarted,
     isMobile,
     isInstalledApp,
     appId,
     appMeta,
     handleFeedback,
     currentChatInstanceRef,
+    conversationChatList,
+    setConversationChatList,
+    handleConversationMessageSend
   } = useChatWithHistoryContext()
   const appConfig = useMemo(() => {
     const config = appParams || {}
@@ -40,7 +45,6 @@ const ChatWrapper = () => {
     } as ChatConfig
   }, [appParams, currentConversationItem?.introduction, currentConversationId])
   const {
-    chatList,
     handleSend,
     handleStop,
     isResponding,
@@ -53,6 +57,11 @@ const ChatWrapper = () => {
     },
     appPrevChatList,
     taskId => stopChatMessageResponding('', taskId, isInstalledApp, appId),
+    currentConversationId,
+    conversationList.find(conversation => conversation.id === currentConversationId),
+    (conversationId, chatList) => setConversationChatList(
+      (prevConversationChatList: Record<string, any>) => ({...prevConversationChatList, [appId || '']: {...prevConversationChatList?.[appId || ''], [conversationId]: chatList}})
+    )
   )
 
   useEffect(() => {
@@ -66,7 +75,7 @@ const ChatWrapper = () => {
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,
       conversation_id: currentConversationId,
     }
-
+    handleConversationMessageSend(currentConversationId)
     if (appConfig?.file_upload?.image.enabled && files?.length)
       data.files = files
 
@@ -75,7 +84,8 @@ const ChatWrapper = () => {
       data,
       {
         onGetSuggestedQuestions: responseItemId => fetchSuggestedQuestions(responseItemId, isInstalledApp, appId),
-        onConversationComplete: currentConversationId ? undefined : handleNewConversationCompleted,
+        onConversationComplete: handleConversationCompleted,
+        onConversationFirstMessage: currentConversationId ? undefined : handleNewConversationStarted,
         isPublicAPI: !isInstalledApp,
       },
     )
@@ -85,7 +95,8 @@ const ChatWrapper = () => {
     currentConversationItem,
     handleSend,
     newConversationInputs,
-    handleNewConversationCompleted,
+    handleConversationCompleted,
+    handleNewConversationStarted,
     isInstalledApp,
     appId,
   ])
@@ -129,7 +140,7 @@ const ChatWrapper = () => {
   return (
     <Chat
       config={appConfig}
-      chatList={chatList}
+      chatList={conversationChatList?.[appId || '']?.[currentConversationId] || []}
       isResponding={isResponding}
       chatContainerInnerClassName={`mx-auto pt-6 w-full max-w-[720px] ${isMobile && 'px-4'}`}
       chatFooterClassName='pb-4'

@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timezone
 
+from flask import request
 from flask_login import current_user
 from flask_restful import reqparse
 from werkzeug.exceptions import InternalServerError, NotFound
@@ -113,13 +114,24 @@ class ChatApi(InstalledAppResource):
         installed_app.last_used_at = datetime.now(timezone.utc).replace(tzinfo=None)
         db.session.commit()
 
+        request_info = {
+            "url": request.url,
+            "bearer_token": request.headers.get('Authorization'),
+            "supports_spawning": True,
+            "query": args['query'],
+            "request_body": args,
+            "app_id": app_model.id
+        }
+        logging.info(f"RECIEVED REQUEST '{request_info['query']}' to {request_info['url']}")
+
         try:
             response = AppGenerateService.generate(
                 app_model=app_model,
                 user=current_user,
                 args=args,
                 invoke_from=InvokeFrom.EXPLORE,
-                streaming=True
+                streaming=True,
+                request_info=request_info
             )
 
             return helper.compact_generate_response(response)

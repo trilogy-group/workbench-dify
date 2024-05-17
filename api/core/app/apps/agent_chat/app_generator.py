@@ -31,7 +31,9 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
                  user: Union[Account, EndUser],
                  args: Any,
                  invoke_from: InvokeFrom,
-                 stream: bool = True) \
+                 stream: bool = True,
+                 request_info:dict = {}
+                 ) \
             -> Union[dict, Generator[dict, None, None]]:
         """
         Generate App response.
@@ -42,6 +44,7 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
         :param invoke_from: invoke from source
         :param stream: is stream
         """
+
         if not stream:
             raise ValueError('Agent Chat App does not support blocking mode')
 
@@ -141,6 +144,7 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
             'queue_manager': queue_manager,
             'conversation_id': conversation.id,
             'message_id': message.id,
+            'request_info': request_info
         })
 
         worker_thread.start()
@@ -164,7 +168,9 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
                          application_generate_entity: AgentChatAppGenerateEntity,
                          queue_manager: AppQueueManager,
                          conversation_id: str,
-                         message_id: str) -> None:
+                         message_id: str,
+                         request_info: dict = {}
+                         ) -> None:
         """
         Generate worker in a new thread.
         :param flask_app: Flask app
@@ -186,7 +192,8 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
                     application_generate_entity=application_generate_entity,
                     queue_manager=queue_manager,
                     conversation=conversation,
-                    message=message
+                    message=message,
+                    request_info=request_info
                 )
             except GenerateTaskStoppedException:
                 pass

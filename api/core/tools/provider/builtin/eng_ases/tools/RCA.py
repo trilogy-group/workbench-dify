@@ -1,3 +1,4 @@
+import logging
 from core.tools.tool.builtin_tool import BuiltinTool
 from core.tools.entities.tool_entities import ToolInvokeMessage
 import ast
@@ -7,6 +8,7 @@ import os
 import requests
 from pydantic import BaseModel, validator
 from typing import List, Union
+import traceback
 API_KEY = os.environ.get("ENG_ASE_API_KEY")
 
 class RCAParametersModel(BaseModel):
@@ -29,20 +31,23 @@ class RCAParametersModel(BaseModel):
 class ASEToolRCA(BuiltinTool):
     def _invoke(self, 
                 user_id: str,
-               tool_parameters: Dict[str, Any], 
+                tool_parameters: Dict[str, Any]
         ) -> Union[ToolInvokeMessage, List[ToolInvokeMessage]]:
-        """
-            invoke tools
-        """ 
-        ase_inputs = RCAParametersModel(**tool_parameters)
-        ase_inputs.dryRun = True
-        response = trigger_ase("maint_rca_do", ase_inputs.dict())
         try:
-            response_dict = json.loads(response.text)
-            text = response_dict.get("answer", response_dict.get("error", f"Found dict keys: {str(response_dict.keys())}."))
-        except:
-            text = response.text
-        return self.create_text_message(text=f"Status: {response.status_code}. {text}")
+            logging.info(f"RCA ASE {tool_parameters}")
+            ase_inputs = RCAParametersModel(**tool_parameters)
+            ase_inputs.dryRun = True
+
+            response = trigger_ase("maint_rca_do", ase_inputs.dict())
+            try:
+                response_dict = json.loads(response.text)
+                text = response_dict.get("answer", response_dict.get("error", f"Found dict keys: {str(response_dict.keys())}."))
+            except:
+                text = response.text
+            return self.create_text_message(text=f"Status: {response.status_code}. {text}")
+        except Exception as e:
+            logging.info(f"Traceback: {traceback.format_exc()}")
+            raise Exception(f"FAILED RCA RUN. {e}")
 
 
 def trigger_ase(procedure: str, inputs: dict):

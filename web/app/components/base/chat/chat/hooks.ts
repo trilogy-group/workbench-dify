@@ -14,6 +14,9 @@ import type {
   PromptVariable,
   VisionFile,
 } from '../types'
+import type {
+  ConversationItem,
+} from '@/models/share'
 import { TransferMethod } from '@/types/app'
 import { useToastContext } from '@/app/components/base/toast'
 import { ssePost } from '@/service/base'
@@ -26,6 +29,7 @@ type SendCallback = {
   onGetConvesationMessages?: (conversationId: string, getAbortController: GetAbortController) => Promise<any>
   onGetSuggestedQuestions?: (responseItemId: string, getAbortController: GetAbortController) => Promise<any>
   onConversationComplete?: (conversationId: string) => void
+  onConversationFirstMessage?: (conversationId: string) => void
   isPublicAPI?: boolean
 }
 
@@ -76,13 +80,16 @@ export const useChat = (
   },
   prevChatList?: ChatItem[],
   stopChat?: (taskId: string) => void,
+  currentConversationId?: string,
+  currentConversationItem?: ConversationItem,
+  updateGlobalChatListForApp?: (conversationId: string, chatList: any) => void
 ) => {
   const { t } = useTranslation()
   const { notify } = useToastContext()
-  const connversationId = useRef('')
+  const connversationId = useRef(currentConversationId || '')
   const hasStopResponded = useRef(false)
-  const [isResponding, setIsResponding] = useState(false)
-  const isRespondingRef = useRef(false)
+  const [isResponding, setIsResponding] = useState(currentConversationItem?.tool_status === "INPROGRESS" || false)
+  const isRespondingRef = useRef(currentConversationItem?.tool_status === "INPROGRESS" || false)
   const [chatList, setChatList] = useState<ChatItem[]>(prevChatList || [])
   const chatListRef = useRef<ChatItem[]>(prevChatList || [])
   const taskIdRef = useRef('')
@@ -100,6 +107,7 @@ export const useChat = (
 
   const handleUpdateChatList = useCallback((newChatList: ChatItem[]) => {
     setChatList(newChatList)
+    if(updateGlobalChatListForApp) updateGlobalChatListForApp(connversationId.current, newChatList)
     chatListRef.current = newChatList
   }, [])
   const handleResponding = useCallback((isResponding: boolean) => {
@@ -182,9 +190,8 @@ export const useChat = (
       chatListRef.current.filter(item => item.id !== responseItem.id && item.id !== placeholderAnswerId),
       (draft) => {
         if (!draft.find(item => item.id === questionId))
-          draft.push({ ...questionItem })
-
-        draft.push({ ...responseItem })
+          draft.push(JSON.parse(JSON.stringify(questionItem))) // deep copy
+        draft.push(JSON.parse(JSON.stringify(responseItem))) // deep copy
       })
     handleUpdateChatList(newListWithAnswer)
   }, [handleUpdateChatList])
@@ -196,6 +203,7 @@ export const useChat = (
       onGetConvesationMessages,
       onGetSuggestedQuestions,
       onConversationComplete,
+      onConversationFirstMessage,
       isPublicAPI,
     }: SendCallback,
   ) => {
@@ -282,7 +290,11 @@ export const useChat = (
           }
 
           if (isFirstMessage && newConversationId)
+          {
             connversationId.current = newConversationId
+            if (onConversationFirstMessage)
+              onConversationFirstMessage(connversationId.current)
+          }
 
           taskIdRef.current = taskId
           if (messageId)

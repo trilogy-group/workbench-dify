@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Generator
 from typing import Any, Union
 
@@ -18,7 +19,8 @@ class AppGenerateService:
                  user: Union[Account, EndUser],
                  args: Any,
                  invoke_from: InvokeFrom,
-                 streaming: bool = True) -> Union[dict, Generator[dict, None, None]]:
+                 streaming: bool = True,
+                 request_info: Any = None) -> Union[dict, Generator[dict, None, None]]:
         """
         App Content Generate
         :param app_model: app model
@@ -42,7 +44,8 @@ class AppGenerateService:
                 user=user,
                 args=args,
                 invoke_from=invoke_from,
-                stream=streaming
+                stream=streaming,
+                request_info=request_info
             )
         elif app_model.mode == AppMode.CHAT.value:
             return ChatAppGenerator().generate(

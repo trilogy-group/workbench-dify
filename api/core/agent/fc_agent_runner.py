@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class FunctionCallAgentRunner(BaseAgentRunner):
     def run(self, 
-            message: Message, query: str, **kwargs: Any
+            message: Message, query: str, request_info: dict ={}, **kwargs: Any
     ) -> Generator[LLMResultChunk, None, None]:
         """
         Run FunctionCall agent application
@@ -244,6 +244,7 @@ class FunctionCallAgentRunner(BaseAgentRunner):
                         message=self.message,
                         invoke_from=self.application_generate_entity.invoke_from,
                         agent_tool_callback=self.agent_callback,
+                        request_info=request_info
                     )
                     # publish files
                     for message_file, save_as in message_files:
