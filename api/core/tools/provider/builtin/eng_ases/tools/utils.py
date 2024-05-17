@@ -126,21 +126,45 @@ def get_chat_history(conversation_id:str, app_id:str) -> List[Dict[str, Any]]:
     else:
         return conversation.summary, []
 
-
 def trigger_ase(procedure: str, inputs: dict):
-    url = "https://wbkktudmnocpkxe35tx62majaa0tnokz.lambda-url.us-east-1.on.aws/"
-    headers = {
-        "X-Api-Key": os.environ.get("ENG_ASE_API_KEY")
-    }
+    API_KEY = os.environ.get("ENG_ASE_API_KEY")
+    CALLBACK_SERVICE_API_KEY = os.environ.get("CALLBACK_SERVICE_API_KEY")
+
+    ase_url = "https://wbkktudmnocpkxe35tx62majaa0tnokz.lambda-url.us-east-1.on.aws/"
+    ase_request_headers = {"X-Api-Key": API_KEY}
+    callback_service_endpoint = "https://48j93p3119.execute-api.us-east-1.amazonaws.com/api"
+    callback_request_headers = {"Authorization": f"Basic {CALLBACK_SERVICE_API_KEY}"}
+
+    # Generate conversation ID 
+    response = requests.post(url=f"{callback_service_endpoint}/callback", headers=callback_request_headers)
+    response.raise_for_status()
+    callback_id = response.json()['id']
+    logging.info(f"Generate callback ID is: {callback_id}")
+
+    # Invoke the ASE
     data = {
         "procedure": procedure,
-        "inputs": inputs
+        "inputs": inputs,
+        "async": True,
+        "callbackUrl": f"{callback_service_endpoint}/callback/{callback_id}"
     }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code != http.HTTPStatus.OK:
-        return f"{response.status_code}. {response.text}"
-    else:
-        return f"{response.status_code}. {response.json()['answer']}"
+    logging.info(f"Triggering ASE with data: {data}")
+    response = requests.post(ase_url, headers=ase_request_headers, json=data)
+    response.raise_for_status()
+
+    # Poll the callback service for ASE response
+    pending_retries = 100
+    while pending_retries > 0:
+        response = requests.get(url=f"{callback_service_endpoint}/callback/{callback_id}", headers=callback_request_headers)
+        response.raise_for_status()
+        response_dict = response.json()
+        if response_dict['status'] == 'COMPLETED':
+            output = response_dict['output']
+            logging.info(f"Response from ASE is: {output}")
+            return output.get("answer", output.get("error", "Something went wrong"))
+        time.sleep(30)
+        pending_retries -= 1
+    return "ASE timed out"
 
 class ASEToolModel(BaseModel):
     artifactUrls: Union[List[str], str]
