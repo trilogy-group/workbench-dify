@@ -1,0 +1,38 @@
+identity: 
+  name: ase_tool_research_qc
+  author: Dify 
+  label: 
+    en_US: Research Quality Check Tool
+description: 
+  human: 
+    en_US: The Research QC Agent checks the quality of the research performed by the Research tool based on a github issue or other relevant documents provided by the user.
+  llm: A tool that checks the quality of the research performed by the ase_tool_research tool by analyzing the issue and the research report. 
+parameters: 
+  - name: artifactUrls
+    type: string 
+    required: true 
+    label: 
+      en_US: Artifact URLs 
+    human_description: 
+      en_US: Provide the URLs of the artifacts related to the issue in a comma-separated list. The first URL should be the core issue link outlining the problem. The second mandatory link is the link to the research report.
+    llm_description: A comma-separated list of URLs needed to resolve the issue. The first URL should be of the core issue. The absence of a core issue link constitutes a bad request and should prompt a request for correction. The second url should be a link to the research report, it too is required.
+    form: llm 
+  - name: productName  
+    type: string 
+    required: true 
+    label: 
+      en_US: Product Name 
+    human_description: 
+      en_US: Name of the product associated with the issue.
+    llm_description: Name of the product associated with the issue. 
+    form: llm 
+  - name: dryRun 
+    type: boolean 
+    required: false 
+    default: true 
+    label: 
+      en_US: Dry Run 
+    human_description: 
+      en_US: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like GitHub.
+    llm_description: If true, makes the subsequent call a readOnly execution, no changes will be made in 3rd party platforms like GitHub. 
+    form: llm 
