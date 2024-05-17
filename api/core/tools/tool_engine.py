@@ -6,7 +6,7 @@ import json
 import traceback
 import asyncio
 
-from core.utils.chat_spawner import spawn_chats, split_queries
+from core.tools.provider.builtin.eng_ases.tools.utils import spawn_chats, split_queries
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.callback_handler.agent_tool_callback_handler import DifyAgentCallbackHandler
 from core.callback_handler.workflow_tool_callback_handler import DifyWorkflowCallbackHandler
@@ -66,8 +66,7 @@ class ToolEngine:
                 try:
                     # Request info should be empty for all calls except to Agent via the Explore page. isMultiprocessing defaults to False for all tools that do not have the parameter.
                     queries = split_queries(tenant_id, request_info['request_body']['conversation_id'], request_info['app_id'], request_info['query'])
-                    logging.info(f"Query splitter result: {queries}")
-                    logging.info(f"Request Info {request_info}")
+                    logging.info(f"Query splitter result: {queries}. Request Info {request_info}")
                     asyncio.run(spawn_chats(request_info, queries))
 
                     response = [ToolInvokeMessage(
