@@ -13,13 +13,10 @@ import {
   getUrl,
   stopChatMessageResponding,
 } from '@/service/share'
-import { usePostHog } from 'posthog-js/react'
-
-const useQuery = () => {
-  return new URLSearchParams(window.location.search);
+interface ChatWrapperProps {
+  username?: string|null;
 }
-
-const ChatWrapper = () => {
+const ChatWrapper: React.FC<ChatWrapperProps> = ({username}) => {
   const {
     appParams,
     appPrevChatList,
@@ -40,16 +37,6 @@ const ChatWrapper = () => {
     setConversationChatList,
     handleConversationMessageSend
   } = useChatWithHistoryContext()
-  const query = useQuery()
-  const posthog = usePostHog()
-
-  useEffect(() => {
-    const username = query.get('username')
-    if(username){
-      console.log("identified username", username)
-      posthog.identify(username)
-    }
-  })
   
   const appConfig = useMemo(() => {
     const config = appParams || {}
@@ -86,7 +73,6 @@ const ChatWrapper = () => {
   }, [])
 
   const doSend: OnSend = useCallback((message, files) => {
-    const username = query.get('username')
     const data: any = {
       query: message,
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,
