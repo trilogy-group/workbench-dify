@@ -72,9 +72,6 @@ const ChatWrapper = () => {
   }, [])
 
   const doSend: OnSend = useCallback((message, files) => {
-    console.log("sending message", message)
-    posthog.capture('message_sent', {message})
-
     const data: any = {
       query: message,
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,
@@ -94,6 +91,8 @@ const ChatWrapper = () => {
         isPublicAPI: !isInstalledApp,
       },
     )
+    console.log("sending message", message)
+    posthog.capture('message_sent', {message, conversationId: currentConversationId})
   }, [
     appConfig,
     currentConversationId,
