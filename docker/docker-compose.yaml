@@ -5,12 +5,15 @@ services:
     build: 
       context: ../api
       dockerfile: Dockerfile
+      args:
+        - ENG_ASE_API_KEY=${ENG_ASE_API_KEY}
+        - CALLBACK_SERVICE_API_KEY=${CALLBACK_SERVICE_API_KEY}
     restart: always
     environment:
       # Startup mode, 'api' starts the API server.
       MODE: api
-      ENG_ASE_API_KEY: ""
-      CALLBACK_SERVICE_API_KEY: ""
+      ENG_ASE_API_KEY: ${ENG_ASE_API_KEY}
+      CALLBACK_SERVICE_API_KEY: ${CALLBACK_SERVICE_API_KEY}
       # The log level for the application. Supported values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
       LOG_LEVEL: INFO
       # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
@@ -269,17 +272,21 @@ services:
 
   # Frontend web application.
   web:
-    image: langgenius/dify-web:0.6.5
+    build: 
+      context: ../web
+      dockerfile: Dockerfile
+      args:
+        - API_URL=${API_URL}
     restart: always
     environment:
       # The base URL of console application api server, refers to the Console base URL of WEB service if console domain is
       # different from api or web app domain.
       # example: http://cloud.dify.ai
-      CONSOLE_API_URL: ''
+      CONSOLE_API_URL: ${API_URL}
       # The URL for Web APP api server, refers to the Web App base URL of WEB service if web app domain is different from
       # console or api domain.
       # example: http://udify.app
-      APP_API_URL: ''
+      APP_API_URL: ${API_URL}
       # The DSN for Sentry error reporting. If not set, Sentry error reporting will be disabled.
       SENTRY_DSN: ''
     # uncomment to expose dify-web port to host

@@ -17,7 +17,11 @@ from core.model_manager import ModelManager
 from core.model_runtime.entities.model_entities import ModelType
 from core.model_runtime.entities.message_entities import UserPromptMessage, SystemPromptMessage, AssistantPromptMessage
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(3))
+def log_retry_error(retry_state):
+    logging.error(f"Retrying due to {retry_state.outcome.failed}. Exception: {retry_state.outcome.exception()}")
+    logging.error(traceback.format_exc())
+
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(3), retry_error_callback=log_retry_error)
 async def make_request_async(request_model: dict, query: str) -> None:
     body = {
         "response_mode": "streaming",
@@ -30,9 +34,8 @@ async def make_request_async(request_model: dict, query: str) -> None:
         "Authorization": request_model["bearer_token"],
         "Content-Type": "application/json"
     }
-    
     async with httpx.AsyncClient(timeout=httpx.Timeout(3.0, read=10.0), http2=True) as client:
-        response = await client.post(request_model["url"].replace('http', 'https'), json=body, headers=headers)
+        response = await client.post(request_model["url"], json=body, headers=headers)
     
 
 async def spawn_chats(request_model, queries):
@@ -40,7 +43,7 @@ async def spawn_chats(request_model, queries):
 
     for query in queries:
         task = asyncio.create_task(make_request_async(request_model, query))
-        await asyncio.sleep(1)  # Lets it reach the http call
+        await asyncio.sleep(3)  
     logging.info(f"Chat Spawner Finished in {time.time() - start_time}s")
 
 
