@@ -13,6 +13,7 @@ import {
   getUrl,
   stopChatMessageResponding,
 } from '@/service/share'
+import { usePostHog } from 'posthog-js/react'
 
 const ChatWrapper = () => {
   const {
@@ -35,6 +36,7 @@ const ChatWrapper = () => {
     setConversationChatList,
     handleConversationMessageSend
   } = useChatWithHistoryContext()
+  const posthog = usePostHog()
   const appConfig = useMemo(() => {
     const config = appParams || {}
 
@@ -70,6 +72,9 @@ const ChatWrapper = () => {
   }, [])
 
   const doSend: OnSend = useCallback((message, files) => {
+    console.log("sending message", message)
+    posthog.capture('message_sent', {message})
+
     const data: any = {
       query: message,
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,

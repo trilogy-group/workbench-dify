@@ -18,6 +18,7 @@ import Loading from '@/app/components/base/loading'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { checkOrSetAccessToken } from '@/app/components/share/utils'
 import AppUnavailable from '@/app/components/base/app-unavailable'
+import { PostHogProvider} from 'posthog-js/react'
 
 type ChatWithHistoryProps = {
   className?: string
@@ -62,37 +63,39 @@ const ChatWithHistory: FC<ChatWithHistoryProps> = ({
   }
 
   return (
-    <div className={`h-full flex bg-white ${className} ${isMobile && 'flex-col'}`}>
-      {
-        !isMobile && (
-          <Sidebar />
-        )
-      }
-      {
-        isMobile && (
-          <HeaderInMobile />
-        )
-      }
-      <div className={`grow overflow-hidden ${showConfigPanelBeforeChat && !appPrevChatList.length && 'flex items-center justify-center'}`}>
+    <PostHogProvider apiKey="phc_XoOaVreBJqQa76OR3ocRu4FhRd0AMa8E6lgdCrXmpSs">
+      <div className={`h-full flex bg-white ${className} ${isMobile && 'flex-col'}`}>
         {
-          showConfigPanelBeforeChat && !appChatListDataLoading && !appPrevChatList.length && (
-            <div className={`flex w-full items-center justify-center h-full ${isMobile && 'px-4'}`}>
-              <ConfigPanel />
-            </div>
+          !isMobile && (
+            <Sidebar />
           )
         }
         {
-          appChatListDataLoading && chatReady && (
-            <Loading type='app' />
+          isMobile && (
+            <HeaderInMobile />
           )
         }
-        {
-          chatReady && !appChatListDataLoading && (
-            <ChatWrapper key={chatShouldReloadKey} />
-          )
-        }
+        <div className={`grow overflow-hidden ${showConfigPanelBeforeChat && !appPrevChatList.length && 'flex items-center justify-center'}`}>
+          {
+            showConfigPanelBeforeChat && !appChatListDataLoading && !appPrevChatList.length && (
+              <div className={`flex w-full items-center justify-center h-full ${isMobile && 'px-4'}`}>
+                <ConfigPanel />
+              </div>
+            )
+          }
+          {
+            appChatListDataLoading && chatReady && (
+              <Loading type='app' />
+            )
+          }
+          {
+            chatReady && !appChatListDataLoading && (
+              <ChatWrapper key={chatShouldReloadKey} />
+            )
+          }
+        </div>
       </div>
-    </div>
+    </PostHogProvider>
   )
 }
 
