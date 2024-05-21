@@ -15,6 +15,10 @@ import {
 } from '@/service/share'
 import { usePostHog } from 'posthog-js/react'
 
+const useQuery = () => {
+  return new URLSearchParams(window.location.search);
+}
+
 const ChatWrapper = () => {
   const {
     appParams,
@@ -36,7 +40,17 @@ const ChatWrapper = () => {
     setConversationChatList,
     handleConversationMessageSend
   } = useChatWithHistoryContext()
+  const query = useQuery()
   const posthog = usePostHog()
+
+  useEffect(() => {
+    const username = query.get('username')
+    if(username){
+      console.log("identified username", username)
+      posthog.identify(username)
+    }
+  })
+  
   const appConfig = useMemo(() => {
     const config = appParams || {}
 
@@ -72,10 +86,14 @@ const ChatWrapper = () => {
   }, [])
 
   const doSend: OnSend = useCallback((message, files) => {
+    const username = query.get('username')
     const data: any = {
       query: message,
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,
       conversation_id: currentConversationId,
+    }
+    if (username){
+      data['username'] = username
     }
     handleConversationMessageSend(currentConversationId)
     if (appConfig?.file_upload?.image.enabled && files?.length)
@@ -91,8 +109,6 @@ const ChatWrapper = () => {
         isPublicAPI: !isInstalledApp,
       },
     )
-    console.log("sending message", message)
-    posthog.capture('message_sent', {message, conversationId: currentConversationId})
   }, [
     appConfig,
     currentConversationId,

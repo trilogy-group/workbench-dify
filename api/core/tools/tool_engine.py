@@ -5,6 +5,8 @@ from typing import Union
 import json
 import traceback
 import asyncio
+import os
+from posthog import Posthog
 
 from core.tools.provider.builtin.eng_ases.tools.utils import spawn_chats, split_queries
 from core.app.entities.app_invoke_entities import InvokeFrom
@@ -26,6 +28,7 @@ from core.tools.utils.message_transformer import ToolFileMessageTransformer
 from extensions.ext_database import db
 from models.model import Message, MessageFile
 
+posthog = Posthog(os.environ.get('POSTHOG_PROJECT_KEY'), host="https://us.i.posthog.com")
 
 class ToolEngine:
     """
@@ -78,8 +81,27 @@ class ToolEngine:
                     logging.error(f"Traceback {traceback.format_exc()}")
                     raise e
             else:
-                logging.info(f"INVOKING TOOL FOR {request_info}.")
+                posthog.capture(
+                    request_info['username'],
+                    'tool_invoked',
+                    {
+                        "conversation_id": message.conversation_id,
+                        "tool_name": tool.identity.name,
+                        "tool_inputs": json.dumps(tool_parameters) if isinstance(tool_parameters, dict) else tool_parameters
+                    }
+                )
                 meta, response = ToolEngine._invoke(tool, tool_parameters, user_id)
+                posthog.capture(
+                    request_info['username'],
+                    'tool_responded',
+                    {
+                        "conversation_id": message.conversation_id,
+                        "tool_name": tool.identity.name,
+                        "tool_inputs": json.dumps(tool_parameters) if isinstance(tool_parameters, dict) else tool_parameters,
+                        "response": response[0].message
+                    }
+                )
+
             
             response = ToolFileMessageTransformer.transform_tool_invoke_messages(
                 messages=response, 

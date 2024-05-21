@@ -3,6 +3,8 @@ import logging
 from collections.abc import Generator
 from copy import deepcopy
 from typing import Any, Union
+import os
+from posthog import Posthog
 
 from core.agent.base_agent_runner import BaseAgentRunner
 from core.app.apps.base_app_queue_manager import PublishFrom
@@ -21,6 +23,8 @@ from core.tools.entities.tool_entities import ToolInvokeMeta
 from core.tools.tool_engine import ToolEngine
 from models.model import Message
 
+posthog = Posthog(os.environ.get('POSTHOG_PROJECT_KEY'), host="https://us.i.posthog.com")
+
 logger = logging.getLogger(__name__)
 
 class FunctionCallAgentRunner(BaseAgentRunner):
@@ -30,6 +34,14 @@ class FunctionCallAgentRunner(BaseAgentRunner):
         """
         Run FunctionCall agent application
         """
+        posthog.capture(
+            request_info['username'],
+            'query_sent',
+            {
+                "conversation_id": message.conversation_id,
+                "query": message.query
+            }
+        )
         app_generate_entity = self.application_generate_entity
 
         app_config = self.app_config
@@ -314,6 +326,14 @@ class FunctionCallAgentRunner(BaseAgentRunner):
             usage=llm_usage['usage'] if llm_usage['usage'] else LLMUsage.empty_usage(),
             system_fingerprint=''
         )), PublishFrom.APPLICATION_MANAGER)
+        posthog.capture(
+            request_info['username'],
+            'answer_received',
+            {
+                "conversation_id": message.conversation_id,
+                "answer": final_answer
+            }
+        )
 
     def check_tool_calls(self, llm_result_chunk: LLMResultChunk) -> bool:
         """
