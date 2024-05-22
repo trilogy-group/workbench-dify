@@ -2,6 +2,7 @@ import type { FC } from 'react'
 import {
   useEffect,
   useState,
+  useRef
 } from 'react'
 import { useAsyncEffect } from 'ahooks'
 import {
@@ -18,7 +19,11 @@ import Loading from '@/app/components/base/loading'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { checkOrSetAccessToken } from '@/app/components/share/utils'
 import AppUnavailable from '@/app/components/base/app-unavailable'
-import { PostHogProvider} from 'posthog-js/react'
+import { PostHogProvider, usePostHog } from 'posthog-js/react'
+
+const useQuery = () => {
+  return new URLSearchParams(window.location.search);
+}
 
 type ChatWithHistoryProps = {
   className?: string
@@ -37,6 +42,9 @@ const ChatWithHistory: FC<ChatWithHistoryProps> = ({
     isMobile,
   } = useChatWithHistoryContext()
 
+  const hasPosthogUserBeenIdentified = useRef<boolean>(false)
+  const query = useQuery()
+  const posthog = usePostHog()
   const chatReady = (!showConfigPanelBeforeChat || !!appPrevChatList.length)
   const customConfig = appData?.custom_config
   const site = appData?.site
@@ -49,6 +57,16 @@ const ChatWithHistory: FC<ChatWithHistoryProps> = ({
         document.title = `${site.title} - Powered by Dify`
     }
   }, [site, customConfig])
+
+  useEffect(() => {
+    if(!hasPosthogUserBeenIdentified.current){
+      const username = query.get('username')
+      if(username){
+        posthog.identify(username)
+        hasPosthogUserBeenIdentified.current = true
+      }
+    }
+  }, [])
 
   if (appInfoLoading) {
     return (
@@ -63,7 +81,6 @@ const ChatWithHistory: FC<ChatWithHistoryProps> = ({
   }
 
   return (
-    <PostHogProvider apiKey="phc_XoOaVreBJqQa76OR3ocRu4FhRd0AMa8E6lgdCrXmpSs">
       <div className={`h-full flex bg-white ${className} ${isMobile && 'flex-col'}`}>
         {
           !isMobile && (
@@ -90,12 +107,11 @@ const ChatWithHistory: FC<ChatWithHistoryProps> = ({
           }
           {
             chatReady && !appChatListDataLoading && (
-              <ChatWrapper key={chatShouldReloadKey} />
+              <ChatWrapper key={chatShouldReloadKey} username={query.get('username')} />
             )
           }
         </div>
       </div>
-    </PostHogProvider>
   )
 }
 
@@ -183,7 +199,9 @@ const ChatWithHistoryWrap: FC<ChatWithHistoryWrapProps> = ({
       setConversationChatList,
       handleConversationMessageSend
     }}>
-      <ChatWithHistory className={className} />
+      <PostHogProvider apiKey="phc_XoOaVreBJqQa76OR3ocRu4FhRd0AMa8E6lgdCrXmpSs">
+        <ChatWithHistory className={className} />
+      </PostHogProvider>
     </ChatWithHistoryContext.Provider>
   )
 }

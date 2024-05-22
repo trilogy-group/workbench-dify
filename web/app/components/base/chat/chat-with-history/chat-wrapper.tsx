@@ -13,9 +13,10 @@ import {
   getUrl,
   stopChatMessageResponding,
 } from '@/service/share'
-import { usePostHog } from 'posthog-js/react'
-
-const ChatWrapper = () => {
+interface ChatWrapperProps {
+  username?: string|null;
+}
+const ChatWrapper: React.FC<ChatWrapperProps> = ({username}) => {
   const {
     appParams,
     appPrevChatList,
@@ -36,7 +37,7 @@ const ChatWrapper = () => {
     setConversationChatList,
     handleConversationMessageSend
   } = useChatWithHistoryContext()
-  const posthog = usePostHog()
+  
   const appConfig = useMemo(() => {
     const config = appParams || {}
 
@@ -77,6 +78,9 @@ const ChatWrapper = () => {
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,
       conversation_id: currentConversationId,
     }
+    if (username){
+      data['username'] = username
+    }
     handleConversationMessageSend(currentConversationId)
     if (appConfig?.file_upload?.image.enabled && files?.length)
       data.files = files
@@ -91,8 +95,6 @@ const ChatWrapper = () => {
         isPublicAPI: !isInstalledApp,
       },
     )
-    console.log("sending message", message)
-    posthog.capture('message_sent', {message, conversationId: currentConversationId})
   }, [
     appConfig,
     currentConversationId,

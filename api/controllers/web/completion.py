@@ -101,6 +101,7 @@ class ChatApi(WebApiResource):
         parser.add_argument('response_mode', type=str, choices=['blocking', 'streaming'], location='json')
         parser.add_argument('conversation_id', type=uuid_value, location='json')
         parser.add_argument('retriever_from', type=str, required=False, default='web_app', location='json')
+        parser.add_argument('username', type=str, required=False, default='unknwon', location='json')
 
         args = parser.parse_args()
 
@@ -112,9 +113,9 @@ class ChatApi(WebApiResource):
             "supports_spawning": True,
             "query": args['query'],
             "request_body": args,
-            "app_id": app_model.id
+            "app_id": app_model.id,
+            "username": args['username']
         }
-        logging.info(f"RECIEVED REQUEST Deployed WEBAPI' {request_info['query']}' to {request_info['url']}")
         try:
             response = AppGenerateService.generate(
                 app_model=app_model,
