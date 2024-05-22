@@ -4,7 +4,6 @@ from collections.abc import Generator
 from copy import deepcopy
 from typing import Any, Union
 import os
-from posthog import Posthog
 
 from core.agent.base_agent_runner import BaseAgentRunner
 from core.app.apps.base_app_queue_manager import PublishFrom
@@ -22,8 +21,7 @@ from core.model_runtime.entities.message_entities import (
 from core.tools.entities.tool_entities import ToolInvokeMeta
 from core.tools.tool_engine import ToolEngine
 from models.model import Message
-
-posthog = Posthog(os.environ.get('POSTHOG_PROJECT_KEY'), host="https://us.i.posthog.com")
+from core import posthog
 
 logger = logging.getLogger(__name__)
 

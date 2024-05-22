@@ -6,7 +6,6 @@ import json
 import traceback
 import asyncio
 import os
-from posthog import Posthog
 
 from core.tools.provider.builtin.eng_ases.tools.utils import spawn_chats, split_queries
 from core.app.entities.app_invoke_entities import InvokeFrom
@@ -27,8 +26,7 @@ from core.tools.tool.tool import Tool
 from core.tools.utils.message_transformer import ToolFileMessageTransformer
 from extensions.ext_database import db
 from models.model import Message, MessageFile
-
-posthog = Posthog(os.environ.get('POSTHOG_PROJECT_KEY'), host="https://us.i.posthog.com")
+from core import posthog
 
 class ToolEngine:
     """
